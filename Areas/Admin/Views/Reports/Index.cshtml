@@ -1,0 +1,77 @@
+﻿@{
+    ViewData["Title"] = "Reports Dashboard";
+    var monthlyRevenue = ViewBag.MonthlyRevenue as IEnumerable<dynamic>;
+    var topEvents = ViewBag.TopEvents as IEnumerable<dynamic>;
+}
+
+<div class="p-6 space-y-6">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">📊 Reports Dashboard</h1>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+        <div class="bg-blue-600 text-white p-5 rounded-xl shadow">
+            <h3 class="text-lg font-semibold">Total Bookings</h3>
+            <p class="text-2xl font-bold mt-2">@ViewBag.TotalBookings</p>
+        </div>
+        <div class="bg-green-600 text-white p-5 rounded-xl shadow">
+            <h3 class="text-lg font-semibold">Paid</h3>
+            <p class="text-2xl font-bold mt-2">@ViewBag.TotalPaid</p>
+        </div>
+        <div class="bg-yellow-500 text-white p-5 rounded-xl shadow">
+            <h3 class="text-lg font-semibold">Pending</h3>
+            <p class="text-2xl font-bold mt-2">@ViewBag.TotalPending</p>
+        </div>
+        <div class="bg-red-600 text-white p-5 rounded-xl shadow">
+            <h3 class="text-lg font-semibold">Cancelled</h3>
+            <p class="text-2xl font-bold mt-2">@ViewBag.TotalCancelled</p>
+        </div>
+        <div class="bg-indigo-600 text-white p-5 rounded-xl shadow">
+            <h3 class="text-lg font-semibold">Total Revenue</h3>
+            <p class="text-2xl font-bold mt-2">฿@string.Format("{0:N2}", ViewBag.TotalRevenue)</p>
+        </div>
+    </div>
+
+    <!-- Monthly Revenue Table -->
+    <div class="bg-white rounded-2xl shadow p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">📅 Monthly Revenue</h2>
+        <table class="min-w-full text-sm text-gray-700">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="py-2 px-4 text-left">Month</th>
+                    <th class="py-2 px-4 text-left">Revenue (฿)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in monthlyRevenue)
+                {
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="py-2 px-4">@item.Month</td>
+                        <td class="py-2 px-4">@item.Total.ToString("N2")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Top Events -->
+    <div class="bg-white rounded-2xl shadow p-6">
+        <h2 class="text-xl font-bold text-gray-800 mb-4">🏆 Top 5 Events by Sales</h2>
+        <table class="min-w-full text-sm text-gray-700">
+            <thead class="bg-gray-100">
+                <tr>
+                    <th class="py-2 px-4 text-left">Event</th>
+                    <th class="py-2 px-4 text-left">Sales (฿)</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var e in topEvents)
+                {
+                    <tr class="border-b hover:bg-gray-50">
+                        <td class="py-2 px-4">@e.Event</td>
+                        <td class="py-2 px-4">@e.Sales.ToString("N2")</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

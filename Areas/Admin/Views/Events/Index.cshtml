@@ -1,0 +1,102 @@
+﻿@model IEnumerable<StarEvents.Models.Event>
+
+@{
+    ViewData["Title"] = "Manage Events";
+}
+
+<div class="max-w-7xl mx-auto mt-8">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-3xl font-semibold text-blue-700">Manage Events</h2>
+        <a asp-action="Create"
+           class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md shadow-md transition">
+            + Create New Event
+        </a>
+    </div>
+
+    <div class="overflow-x-auto bg-white shadow-md rounded-xl ring-1 ring-black/5">
+        <table class="min-w-full text-sm text-left text-gray-700 border-collapse">
+            <thead class="bg-blue-50 text-blue-700 uppercase text-xs font-semibold border-b">
+                <tr>
+                    <th class="px-6 py-3">Title</th>
+                    <th class="px-6 py-3">Dates</th>
+                    <th class="px-6 py-3">Ticket Price</th>
+                    <th class="px-6 py-3">Seats</th>
+                    <th class="px-6 py-3">Venue</th>
+                    <th class="px-6 py-3">Category</th>
+                    <th class="px-6 py-3">Organizer</th>
+                    <th class="px-6 py-3">Status</th>
+                    <th class="px-6 py-3">Created</th>
+                    <th class="px-6 py-3 text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                @foreach (var item in Model)
+                {
+                    <tr class="hover:bg-blue-50 transition">
+                        <td class="px-6 py-4 font-medium text-gray-900">@item.Title</td>
+
+                        <td class="px-6 py-4">
+                            <div class="text-sm">
+                                <div><span class="font-semibold">Start:</span> @item.StartDate.ToString("MMM dd, yyyy")</div>
+                                <div><span class="font-semibold">End:</span> @item.EndDate.ToString("MMM dd, yyyy")</div>
+                            </div>
+                        </td>
+
+                        <td class="px-6 py-4 text-gray-700">
+                            $@item.TicketPrice.ToString("0.00")
+                        </td>
+
+                        <td class="px-6 py-4">
+                            <div>@item.AvailableSeats / @item.TotalSeats</div>
+                        </td>
+
+                        <td class="px-6 py-4 text-gray-700">
+                            @item.Venue?.Name<br />
+                            <span class="text-xs text-gray-500">@item.Venue?.Location</span>
+                        </td>
+
+                        <td class="px-6 py-4">@item.Category?.Name</td>
+
+                        <td class="px-6 py-4">
+                            @item.Organizer?.FullName ?? @item.Organizer?.Email
+                        </td>
+
+                        <td class="px-6 py-4">
+                            @if (item.Status == "Approved")
+                            {
+                                <span class="px-2 py-1 text-green-700 bg-green-100 rounded-full text-xs font-medium">@item.Status</span>
+                            }
+                            else if (item.Status == "Rejected")
+                            {
+                                <span class="px-2 py-1 text-red-700 bg-red-100 rounded-full text-xs font-medium">@item.Status</span>
+                            }
+                            else
+                            {
+                                <span class="px-2 py-1 text-yellow-700 bg-yellow-100 rounded-full text-xs font-medium">@item.Status</span>
+                            }
+                        </td>
+
+                        <td class="px-6 py-4 text-gray-600 text-sm">
+                            @item.CreatedAt.ToString("MMM dd, yyyy")
+                        </td>
+
+                        <td class="px-6 py-4 text-center space-x-2">
+                            <a asp-action="Edit" asp-route-id="@item.EventId"
+                               class="text-blue-600 hover:underline">Edit</a>
+                            <a asp-action="Details" asp-route-id="@item.EventId"
+                               class="text-gray-600 hover:underline">Details</a>
+                            <a asp-action="Delete" asp-route-id="@item.EventId"
+                               class="text-red-600 hover:underline">Delete</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

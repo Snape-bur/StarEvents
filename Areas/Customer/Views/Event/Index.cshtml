@@ -1,0 +1,45 @@
+﻿@model IEnumerable<StarEvents.Models.Event>
+
+@{
+    ViewData["Title"] = "Events";
+}
+
+<div class="max-w-7xl mx-auto mt-10">
+    <h2 class="text-3xl font-bold text-blue-700 mb-6">Upcoming Events</h2>
+
+    @if (!Model.Any())
+    {
+        <p class="text-gray-500">No approved events available at the moment.</p>
+    }
+    else
+    {
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            @foreach (var e in Model)
+            {
+                <div class="bg-white rounded-2xl shadow ring-1 ring-black/5 p-5 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-xl font-semibold text-gray-900">@e.Title</h3>
+                        <p class="text-gray-500 text-sm mt-1">@e.Venue?.Name</p>
+                        <p class="text-gray-600 mt-2">@e.Description?.Substring(0, Math.Min(100, e.Description.Length))...</p>
+                    </div>
+
+                    <div class="mt-4 text-sm text-gray-500">
+                        <p><strong>Date:</strong> @e.StartDate.ToString("MMM dd, yyyy")</p>
+                        <p><strong>Price:</strong> $@e.TicketPrice.ToString("0.00")</p>
+                        <p><strong>Available:</strong> @e.AvailableSeats seats</p>
+                    </div>
+
+                    <div class="mt-6 flex justify-between items-center">
+                        <a asp-action="Details" asp-route-id="@e.EventId"
+                           class="text-blue-600 hover:underline">View Details</a>
+
+                        <a asp-area="Customer" asp-controller="Booking" asp-action="Create" asp-route-id="@e.EventId"
+                           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-md transition">
+                            Book Now
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+    }
+</div>

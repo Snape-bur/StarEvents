@@ -1,0 +1,29 @@
+﻿@{
+    ViewData["Title"] = "Organizer Dashboard";
+}
+
+<div class="max-w-6xl mx-auto mt-10">
+    <h1 class="text-3xl font-bold text-blue-700 mb-6">Organizer Dashboard</h1>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="bg-white p-5 rounded-xl shadow ring-1 ring-blue-100 text-center">
+            <h3 class="text-gray-600 text-sm font-medium">Total Events</h3>
+            <p class="text-3xl font-semibold text-blue-600">@ViewBag.TotalEvents</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl shadow ring-1 ring-yellow-100 text-center">
+            <h3 class="text-gray-600 text-sm font-medium">Pending Events</h3>
+            <p class="text-3xl font-semibold text-yellow-600">@ViewBag.PendingEvents</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl shadow ring-1 ring-green-100 text-center">
+            <h3 class="text-gray-600 text-sm font-medium">Total Bookings</h3>
+            <p class="text-3xl font-semibold text-green-600">@ViewBag.TotalBookings</p>
+        </div>
+
+        <div class="bg-white p-5 rounded-xl shadow ring-1 ring-purple-100 text-center">
+            <h3 class="text-gray-600 text-sm font-medium">Total Revenue</h3>
+            <p class="text-3xl font-semibold text-purple-600">$@ViewBag.TotalRevenue</p>
+        </div>
+    </div>
+</div>

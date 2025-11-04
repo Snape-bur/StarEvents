@@ -1,0 +1,41 @@
+﻿@model StarEvents.Models.Venue
+
+@{
+    ViewData["Title"] = "Delete Venue";
+}
+
+<div class="max-w-3xl mx-auto mt-10 bg-white p-8 rounded-xl shadow-md">
+    <h2 class="text-2xl font-semibold text-red-700 mb-6">Delete Venue</h2>
+
+    <p class="text-gray-600 mb-6">Are you sure you want to delete this venue? This action cannot be undone.</p>
+
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-gray-700 mb-6">
+        <div>
+            <dt class="font-semibold text-gray-600">Venue Name</dt>
+            <dd>@Model.Name</dd>
+        </div>
+
+        <div>
+            <dt class="font-semibold text-gray-600">Location</dt>
+            <dd>@Model.Location</dd>
+        </div>
+
+        <div>
+            <dt class="font-semibold text-gray-600">Capacity</dt>
+            <dd>@Model.Capacity</dd>
+        </div>
+    </dl>
+
+    <form asp-action="Delete" method="post" class="flex justify-between items-center">
+        <input type="hidden" asp-for="VenueId" />
+        <a asp-action="Index"
+           class="text-gray-600 hover:underline">
+            ← Back to List
+        </a>
+
+        <button type="submit"
+                class="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded-md shadow-md transition">
+            Delete Venue
+        </button>
+    </form>
+</div>

@@ -1,0 +1,50 @@
+﻿@model IEnumerable<StarEvents.Models.Booking>
+@{
+    ViewData["Title"] = "Bookings";
+}
+
+<div class="max-w-7xl mx-auto mt-10">
+    <h1 class="text-3xl font-bold text-blue-700 mb-6">My Event Bookings</h1>
+
+    <div class="overflow-x-auto bg-white shadow rounded-xl ring-1 ring-black/5">
+        <table class="min-w-full text-sm text-left text-gray-700 border-collapse">
+            <thead class="bg-blue-50 text-blue-700 uppercase text-xs font-semibold">
+                <tr>
+                    <th class="px-6 py-3">Event</th>
+                    <th class="px-6 py-3">Customer</th>
+                    <th class="px-6 py-3">Quantity</th>
+                    <th class="px-6 py-3">Total</th>
+                    <th class="px-6 py-3">Status</th>
+                    <th class="px-6 py-3">Date</th>
+                    <th class="px-6 py-3 text-center">Actions</th>
+                </tr>
+            </thead>
+            <tbody class="divide-y divide-gray-200">
+                @foreach (var item in Model)
+                {
+                    <tr class="hover:bg-blue-50 transition">
+                        <td class="px-6 py-4 font-medium">@item.Event?.Title</td>
+                        <td class="px-6 py-4">@item.Customer?.FullName ?? @item.Customer?.Email</td>
+                        <td class="px-6 py-4">@item.Quantity</td>
+                        <td class="px-6 py-4 text-green-700">$@item.TotalPrice.ToString("0.00")</td>
+                        <td class="px-6 py-4">
+                            @if (item.Status == "Paid")
+                            {
+                                <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">@item.Status</span>
+                            }
+                            else
+                            {
+                                <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">@item.Status</span>
+                            }
+                        </td>
+                        <td class="px-6 py-4 text-gray-500">@item.BookingDate.ToString("MMM dd, yyyy")</td>
+                        <td class="px-6 py-4 text-center">
+                            <a asp-action="Details" asp-route-id="@item.BookingId"
+                               class="text-blue-600 hover:underline">View</a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>

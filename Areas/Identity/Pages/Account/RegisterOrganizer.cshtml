@@ -1,0 +1,71 @@
+﻿@page
+@model StarEvents.Areas.Identity.Pages.Account.RegisterOrganizerModel
+@{
+    ViewData["Title"] = "Organizer Registration";
+    Layout = "/Areas/Identity/Pages/Shared/_AuthLayout.cshtml";
+}
+
+<div class="d-flex justify-content-center align-items-center min-vh-100 bg-light">
+    <div class="card shadow-lg border-0 rounded-4" style="max-width: 500px; width: 100%;">
+        <div class="card-body p-4 p-sm-5">
+
+            <!-- Header -->
+            <div class="text-center mb-4">
+                <h3 class="fw-bold text-primary">StarEvents</h3>
+                <p class="text-muted mb-0">Register as an Event Organizer</p>
+            </div>
+
+            <!-- Validation -->
+            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+
+            <!-- Organizer Register Form -->
+            <form id="registerOrganizerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                <div class="mb-3">
+                    <label asp-for="Input.FullName" class="form-label fw-semibold">Full Name</label>
+                    <input asp-for="Input.FullName" class="form-control form-control-lg" autocomplete="name" placeholder="John Doe" />
+                    <span asp-validation-for="Input.FullName" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Email" class="form-label fw-semibold">Email address</label>
+                    <input asp-for="Input.Email" class="form-control form-control-lg" autocomplete="username" placeholder="name@example.com" />
+                    <span asp-validation-for="Input.Email" class="text-danger"></span>
+                </div>
+
+                <div class="mb-3">
+                    <label asp-for="Input.Password" class="form-label fw-semibold">Password</label>
+                    <input asp-for="Input.Password" class="form-control form-control-lg" autocomplete="new-password" placeholder="••••••••" />
+                    <span asp-validation-for="Input.Password" class="text-danger"></span>
+                </div>
+
+                <div class="mb-4">
+                    <label asp-for="Input.ConfirmPassword" class="form-label fw-semibold">Confirm Password</label>
+                    <input asp-for="Input.ConfirmPassword" class="form-control form-control-lg" autocomplete="new-password" placeholder="••••••••" />
+                    <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
+                </div>
+
+                <div class="d-grid mb-3">
+                    <button id="registerSubmit" type="submit" class="btn btn-success btn-lg rounded-pill shadow-sm">
+                        Register Organizer
+                    </button>
+                </div>
+            </form>
+
+            <!-- Footer Links -->
+            <div class="text-center mt-3 small">
+                <p class="mb-1">Want to book events instead?</p>
+                <a asp-page="/Account/Register" class="text-primary fw-semibold text-decoration-none">Register as Customer</a>
+                <span class="mx-1 text-muted">|</span>
+                <a asp-page="/Account/Login" class="text-primary fw-semibold text-decoration-none">Login</a>
+            </div>
+
+            <div class="text-center mt-3 small text-muted">
+                <p class="mb-0">Organizer accounts require admin approval before activation.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

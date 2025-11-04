@@ -1,0 +1,26 @@
+﻿@model StarEvents.Models.Booking
+@{
+    ViewData["Title"] = "Ticket Details";
+}
+<div class="max-w-md mx-auto mt-10 bg-white shadow-lg rounded-xl overflow-hidden">
+    <div class="p-6 text-center">
+        <h2 class="text-xl font-bold text-blue-600 mb-1">@Model.Event?.Title</h2>
+        <p class="text-sm text-gray-500 mb-2">@Model.Event?.Venue?.Name</p>
+        <p class="text-xs text-gray-400 mb-4">
+            @Model.Event?.StartDate.ToString("dd MMM yyyy hh:mm tt")
+        </p>
+
+        <p class="text-gray-700 mb-3">
+            <strong>Booked On:</strong> @Model.BookingDate.ToString("dd MMM yyyy")<br />
+            <strong>Total:</strong> $@Model.TotalPrice.ToString("0.00")
+        </p>
+
+        @if (!string.IsNullOrEmpty(Model.QRCodePath))
+        {
+            <img src="@Model.QRCodePath.Replace("wwwroot", "")" alt="QR Code"
+                 class="mx-auto w-40 h-40 border rounded-md shadow-md mb-3" />
+        }
+
+        <p class="text-sm text-green-600 font-semibold">Status: @Model.Status</p>
+    </div>
+</div>

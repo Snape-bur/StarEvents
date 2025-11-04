@@ -1,0 +1,78 @@
+﻿@model StarEvents.Models.Booking
+
+@{
+    ViewData["Title"] = "Booking Details";
+}
+
+<div class="p-8">
+    <div class="bg-white shadow-xl rounded-2xl p-8 max-w-3xl mx-auto">
+        <h1 class="text-2xl font-bold text-gray-800 mb-6">🎟️ Booking Details</h1>
+
+        <div class="space-y-4 text-gray-700">
+            <div class="flex justify-between border-b pb-2">
+                <span class="font-semibold">Event Title:</span>
+                <span>@Model.Event?.Title</span>
+            </div>
+
+            <div class="flex justify-between border-b pb-2">
+                <span class="font-semibold">Customer Name:</span>
+                <span>@Model.Customer?.FullName</span>
+            </div>
+
+            <div class="flex justify-between border-b pb-2">
+                <span class="font-semibold">Quantity:</span>
+                <span>@Model.Quantity</span>
+            </div>
+
+            <div class="flex justify-between border-b pb-2">
+                <span class="font-semibold">Total Price (฿):</span>
+                <span>@Model.TotalPrice.ToString("N2")</span>
+            </div>
+
+            <div class="flex justify-between border-b pb-2">
+                <span class="font-semibold">Status:</span>
+                <span>
+                    @if (Model.Status == "Paid")
+                    {
+                        <span class="px-3 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">Paid</span>
+                    }
+                    else if (Model.Status == "Cancelled")
+                    {
+                        <span class="px-3 py-1 bg-red-100 text-red-700 text-xs font-semibold rounded-full">Cancelled</span>
+                    }
+                    else
+                    {
+                        <span class="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs font-semibold rounded-full">Pending</span>
+                    }
+                </span>
+            </div>
+
+            <div class="flex justify-between border-b pb-2">
+                <span class="font-semibold">Booking Date:</span>
+                <span>@Model.BookingDate.ToString("dd MMM yyyy, HH:mm")</span>
+            </div>
+
+            <div class="flex justify-between border-b pb-2">
+                <span class="font-semibold">QR Ticket:</span>
+                <span>
+                    @if (!string.IsNullOrEmpty(Model.QRCodePath))
+                    {
+                        <a href="@Url.Content(Model.QRCodePath)" target="_blank"
+                           class="text-blue-600 hover:underline">View QR</a>
+                    }
+                    else
+                    {
+                        <span class="text-gray-400 text-sm">—</span>
+                    }
+                </span>
+            </div>
+        </div>
+
+        <div class="mt-8 flex justify-between">
+            <a asp-action="Index"
+               class="bg-blue-600 text-white px-5 py-2 rounded-lg hover:bg-blue-700 transition">
+                ← Back to Bookings
+            </a>
+        </div>
+    </div>
+</div>

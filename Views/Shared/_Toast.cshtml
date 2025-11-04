@@ -1,0 +1,41 @@
+﻿@* ✅ Shared Toast Partial View *@
+
+@if (TempData["Success"] != null)
+{
+    <div id="toast-success"
+         class="fixed top-6 right-6 bg-green-100 border border-green-300 text-green-800 px-5 py-3 rounded-xl shadow-lg animate-fadeIn z-50">
+        <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-600" fill="none" viewBox="0 0 24 24"
+                 stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M5 13l4 4L19 7" />
+            </svg>
+            <span class="font-medium">@TempData["Success"]</span>
+        </div>
+    </div>
+}
+
+@if (TempData["Warning"] != null)
+{
+    <div id="toast-warning"
+         class="fixed top-6 right-6 bg-red-100 border border-red-300 text-red-800 px-5 py-3 rounded-xl shadow-lg animate-fadeIn z-50">
+        <div class="flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-600" fill="none" viewBox="0 0 24 24"
+                 stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M6 18L18 6M6 6l12 12" />
+            </svg>
+            <span class="font-medium">@TempData["Warning"]</span>
+        </div>
+    </div>
+}
+
+<script>
+    // ✅ Auto-hide after 3 seconds
+    setTimeout(() => {
+        const success = document.getElementById("toast-success");
+        const warning = document.getElementById("toast-warning");
+        if (success) success.style.display = "none";
+        if (warning) warning.style.display = "none";
+    }, 3000);
+</script>

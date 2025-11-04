@@ -1,0 +1,17 @@
+.vs/
+.vscode/
+bin/
+obj/
+Debug/
+Release/
+[Ll]ogs/
+appsettings.Development.json
+appsettings.Local.json
+secrets.json
+*.user
+*.suo
+*.tmp
+*.mdf
+*.ldf
+TestResults/
+publish/

@@ -1,0 +1,73 @@
+﻿@model IEnumerable<StarEvents.Models.Event>
+@{
+    ViewData["Title"] = "My Events";
+}
+
+<div class="max-w-7xl mx-auto mt-8">
+    <div class="flex justify-between items-center mb-6">
+        <h2 class="text-3xl font-semibold text-blue-700">My Events</h2>
+        <a asp-action="Create"
+           class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md shadow-md transition">
+            + Create New Event
+        </a>
+    </div>
+
+    @if (!Model.Any())
+    {
+        <div class="bg-white p-6 text-center rounded-xl shadow-md text-gray-500">
+            You haven’t created any events yet.
+        </div>
+    }
+    else
+    {
+        <div class="overflow-x-auto bg-white shadow-md rounded-xl ring-1 ring-black/5">
+            <table class="min-w-full text-sm text-left text-gray-700 border-collapse">
+                <thead class="bg-blue-50 text-blue-700 uppercase text-xs font-semibold border-b">
+                    <tr>
+                        <th class="px-6 py-3">Title</th>
+                        <th class="px-6 py-3">Venue</th>
+                        <th class="px-6 py-3">Category</th>
+                        <th class="px-6 py-3">Start</th>
+                        <th class="px-6 py-3">End</th>
+                        <th class="px-6 py-3">Status</th>
+                        <th class="px-6 py-3 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    @foreach (var e in Model)
+                    {
+                        <tr class="hover:bg-blue-50 transition">
+                            <td class="px-6 py-4 font-medium">@e.Title</td>
+                            <td class="px-6 py-4">@e.Venue?.Name</td>
+                            <td class="px-6 py-4">@e.Category?.Name</td>
+                            <td class="px-6 py-4">@e.StartDate.ToString("MMM dd, yyyy")</td>
+                            <td class="px-6 py-4">@e.EndDate.ToString("MMM dd, yyyy")</td>
+
+                            <td class="px-6 py-4">
+                                <span class="px-2 py-1 rounded-full text-xs font-semibold
+                                            @(e.Status == "Approved" ? "bg-green-100 text-green-700" :
+                                                                            e.Status == "Rejected" ? "bg-red-100 text-red-700" :
+                                                                            "bg-yellow-100 text-yellow-700")">
+                            @e.Status
+                        </span>
+                    </td>
+
+                            <td class="px-6 py-4 text-center space-x-2">
+                                <a asp-action="Details" asp-route-id="@e.EventId"
+                                   class="text-gray-600 hover:underline">Details</a>
+
+                        @if (e.Status == "Pending")
+                                {
+                                    <a asp-action="Edit" asp-route-id="@e.EventId"
+                                       class="text-blue-600 hover:underline">Edit</a>
+                                    <a asp-action="Delete" asp-route-id="@e.EventId"
+                                       class="text-red-600 hover:underline">Delete</a>
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

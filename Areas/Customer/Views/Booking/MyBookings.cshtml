@@ -1,0 +1,145 @@
+﻿@model IEnumerable<StarEvents.Models.Booking>
+
+@{
+    ViewData["Title"] = "My Bookings";
+}
+
+<!-- ✅ Alpine.js for modal behavior -->
+<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+
+<div class="max-w-7xl mx-auto mt-10" x-data="{ openModal: false, selectedId: null }">
+    <h2 class="text-3xl font-bold text-blue-700 mb-6">My Bookings</h2>
+
+    <!-- ✅ Success & Error Messages -->
+    @if (TempData["Ok"] != null)
+    {
+        <div class="mb-4 p-3 rounded-lg bg-green-100 text-green-800 border border-green-300">
+            @TempData["Ok"]
+        </div>
+    }
+    @if (TempData["Error"] != null)
+    {
+        <div class="mb-4 p-3 rounded-lg bg-red-100 text-red-800 border border-red-300">
+            @TempData["Error"]
+        </div>
+    }
+
+    <!-- ✅ Booking Table -->
+    @if (!Model.Any())
+    {
+        <div class="text-gray-500 text-center py-10">
+            <p class="text-lg">You have no bookings yet.</p>
+            <p class="text-sm text-gray-400 mt-1">Explore events and start booking!</p>
+        </div>
+    }
+    else
+    {
+        <div class="overflow-x-auto bg-white rounded-xl shadow-md ring-1 ring-black/5">
+            <table class="min-w-full text-sm text-left text-gray-700 border-collapse">
+                <thead class="bg-blue-50 text-blue-700 uppercase text-xs font-semibold border-b">
+                    <tr>
+                        <th class="px-6 py-3">Event</th>
+                        <th class="px-6 py-3">Venue</th>
+                        <th class="px-6 py-3 text-center">Tickets</th>
+                        <th class="px-6 py-3 text-center">Total</th>
+                        <th class="px-6 py-3 text-center">Status</th>
+                        <th class="px-6 py-3 text-center">QR Code</th>
+                        <th class="px-6 py-3 text-center">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    @foreach (var b in Model)
+                    {
+                        <tr class="hover:bg-blue-50 transition">
+                            <td class="px-6 py-4 font-medium">@b.Event?.Title</td>
+                            <td class="px-6 py-4">@b.Event?.Venue?.Name</td>
+                            <td class="px-6 py-4 text-center">@b.Quantity</td>
+                            <td class="px-6 py-4 text-center">$@b.TotalPrice.ToString("0.00")</td>
+                            <td class="px-6 py-4 text-center">
+                                @if (b.Status == "Paid")
+                                {
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Paid</span>
+                                }
+                                else if (b.Status == "Cancelled")
+                                {
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">Cancelled</span>
+                                }
+                                else
+                                {
+                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">Pending</span>
+                                }
+                            </td>
+
+                            <!-- ✅ QR Code Column -->
+                            <td class="px-6 py-4 text-center">
+                                @if (b.Status == "Paid" && !string.IsNullOrEmpty(b.QRCodePath))
+                                {
+                                    <img src="@b.QRCodePath" alt="QR Code"
+                                         class="w-16 h-16 mx-auto border rounded-md shadow-sm" />
+                                }
+                                else
+                                {
+                                    <span class="text-gray-400 text-sm italic">No QR</span>
+                                }
+                            </td>
+
+                            <!-- ✅ Action Buttons -->
+                            <td class="px-6 py-4 text-center space-x-2">
+                                @if (b.Status == "Pending")
+                                {
+                                    <button type="button"
+                                            x-on:click="openModal = true; selectedId = @b.BookingId; selectedEvent = '@b.Event?.Title'; selectedTotal = '@b.TotalPrice.ToString("0.00")'"
+                                            class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 rounded-md shadow">
+                                        Pay Now
+                                    </button>
+                                }
+                                else if (b.Status == "Paid")
+                                {
+                                    <a href="@b.QRCodePath" download class="text-blue-600 hover:underline text-sm">Download QR</a>
+                                }
+                            </td>
+
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+
+    <!-- ✅ Payment Confirmation Modal -->
+    <div x-show="openModal"
+         x-transition
+         class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl shadow-lg p-6 max-w-sm w-full text-center">
+            <h3 class="text-lg font-semibold text-gray-800 mb-3">Confirm Payment</h3>
+
+            <p class="text-gray-600 mb-4">
+                You are about to pay for:
+            </p>
+            <div class="bg-gray-50 border rounded-lg px-4 py-3 mb-4 text-sm text-gray-700">
+                <p><strong>Event:</strong> <span x-text="selectedEvent"></span></p>
+                <p><strong>Total:</strong> $<span x-text="selectedTotal"></span></p>
+            </div>
+
+            <p class="text-gray-500 text-xs mb-6">
+                This action will mark your booking as <strong>Paid</strong> and generate your QR code.
+            </p>
+
+            <div class="flex justify-center space-x-4">
+                <button x-on:click="openModal = false"
+                        class="px-4 py-2 rounded-md bg-gray-200 hover:bg-gray-300 text-gray-700">
+                    Cancel
+                </button>
+                <form method="post" x-bind:action="'/Customer/Booking/Pay/' + selectedId">
+                    <button type="submit"
+                            class="px-4 py-2 rounded-md bg-blue-600 hover:bg-blue-700 text-white">
+                        Confirm & Pay
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+
+    </div>
+

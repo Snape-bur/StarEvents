@@ -1,0 +1,67 @@
+﻿@model IEnumerable<StarEvents.Models.Category>
+
+@{
+    ViewData["Title"] = "Manage Categories";
+}
+
+<div class="max-w-7xl mx-auto mt-8">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="text-3xl font-semibold text-blue-700">Manage Categories</h2>
+
+        <a asp-action="Create"
+           class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-md shadow-md transition">
+            + Create New Category
+        </a>
+    </div>
+
+    <!-- Success Message -->
+    @if (TempData["Ok"] != null)
+    {
+        <div class="mb-4 bg-green-50 border-l-4 border-green-500 text-green-700 p-4 rounded-md shadow-sm">
+            <p class="text-sm">@TempData["Ok"]</p>
+        </div>
+    }
+
+    <!-- Table -->
+    <div class="overflow-x-auto bg-white shadow-md rounded-xl ring-1 ring-black/5">
+        <table class="min-w-full text-sm text-left text-gray-700 border-collapse">
+            <thead class="bg-blue-50 text-blue-700 uppercase text-xs font-semibold border-b">
+                <tr>
+                    <th class="px-6 py-3">Name</th>
+                    <th class="px-6 py-3">Description</th>
+                    <th class="px-6 py-3 text-center">Actions</th>
+                </tr>
+            </thead>
+
+            <tbody class="divide-y divide-gray-200">
+                @foreach (var item in Model)
+                {
+                    <tr class="hover:bg-blue-50 transition">
+                        <td class="px-6 py-4 font-medium text-gray-900">@item.Name</td>
+                        <td class="px-6 py-4 text-gray-700">
+                            @(string.IsNullOrEmpty(item.Description)
+                                                    ? "<span class='italic text-gray-400'>No description</span>"
+                                                    : item.Description)
+                    </td>
+
+                        <td class="px-6 py-4 text-center space-x-2">
+                            <a asp-action="Edit" asp-route-id="@item.CategoryId"
+                               class="text-blue-600 hover:underline">Edit</a>
+                            <a asp-action="Details" asp-route-id="@item.CategoryId"
+                               class="text-gray-600 hover:underline">Details</a>
+                            <a asp-action="Delete" asp-route-id="@item.CategoryId"
+                               class="text-red-600 hover:underline">Delete</a>
+                        </td>
+                    </tr>
+                                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

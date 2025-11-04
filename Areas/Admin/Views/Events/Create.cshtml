@@ -1,0 +1,97 @@
+﻿@model StarEvents.Models.Event
+
+@{
+    ViewData["Title"] = "Create Event";
+}
+
+<div class="max-w-3xl mx-auto bg-white shadow-lg rounded-2xl p-8 mt-8">
+    <h2 class="text-2xl font-semibold text-blue-600 mb-6 text-center">Create New Event</h2>
+
+    <form asp-action="Create" class="space-y-5">
+        <div asp-validation-summary="ModelOnly" class="text-red-500 mb-3"></div>
+
+        <div>
+            <label asp-for="Title" class="font-medium">Title</label>
+            <input asp-for="Title" class="form-control w-full rounded-md border-gray-300" />
+            <span asp-validation-for="Title" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div>
+            <label asp-for="Description" class="font-medium">Description</label>
+            <textarea asp-for="Description" class="form-control w-full rounded-md border-gray-300"></textarea>
+            <span asp-validation-for="Description" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label asp-for="StartDate" class="font-medium">Start Date</label>
+                <input asp-for="StartDate" type="datetime-local" class="form-control w-full rounded-md border-gray-300" />
+                <span asp-validation-for="StartDate" class="text-red-500 text-sm"></span>
+            </div>
+            <div>
+                <label asp-for="EndDate" class="font-medium">End Date</label>
+                <input asp-for="EndDate" type="datetime-local" class="form-control w-full rounded-md border-gray-300" />
+                <span asp-validation-for="EndDate" class="text-red-500 text-sm"></span>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <label asp-for="TicketPrice" class="font-medium">Ticket Price</label>
+                <input asp-for="TicketPrice" class="form-control w-full rounded-md border-gray-300" />
+                <span asp-validation-for="TicketPrice" class="text-red-500 text-sm"></span>
+            </div>
+            <div>
+                <label asp-for="TotalSeats" class="font-medium">Total Seats</label>
+                <input asp-for="TotalSeats" class="form-control w-full rounded-md border-gray-300" />
+                <span asp-validation-for="TotalSeats" class="text-red-500 text-sm"></span>
+            </div>
+        </div>
+
+        <div>
+            <label asp-for="AvailableSeats" class="font-medium">Available Seats</label>
+            <input asp-for="AvailableSeats" class="form-control w-full rounded-md border-gray-300" />
+            <span asp-validation-for="AvailableSeats" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4">
+            <div>
+                <label asp-for="VenueId" class="font-medium">Venue</label>
+                <select asp-for="VenueId" class="form-control w-full rounded-md border-gray-300" asp-items="ViewBag.VenueId"></select>
+            </div>
+
+            <div>
+                <label asp-for="CategoryId" class="font-medium">Category</label>
+                <select asp-for="CategoryId" class="form-control w-full rounded-md border-gray-300" asp-items="ViewBag.CategoryId"></select>
+            </div>
+
+            <div>
+                <label asp-for="OrganizerId" class="font-medium">Organizer</label>
+                <select asp-for="OrganizerId" class="form-control w-full rounded-md border-gray-300" asp-items="ViewBag.OrganizerId"></select>
+            </div>
+        </div>
+
+        <div>
+            <label asp-for="Status" class="font-medium">Status</label>
+            <select asp-for="Status" class="form-control w-full rounded-md border-gray-300">
+                <option>Pending</option>
+                <option>Approved</option>
+                <option>Rejected</option>
+            </select>
+            <span asp-validation-for="Status" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div class="flex justify-between mt-6">
+            <a asp-action="Index" class="text-gray-600 hover:text-gray-800 font-medium">← Back to List</a>
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md shadow-md transition">
+                Create Event
+            </button>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+}

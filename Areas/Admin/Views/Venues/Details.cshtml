@@ -1,0 +1,39 @@
+﻿@model StarEvents.Models.Venue
+
+@{
+    ViewData["Title"] = "Venue Details";
+}
+
+<div class="max-w-3xl mx-auto mt-10 bg-white p-8 rounded-xl shadow-md">
+    <h2 class="text-2xl font-semibold text-blue-700 mb-6">Venue Details</h2>
+
+    <dl class="grid grid-cols-1 sm:grid-cols-2 gap-6 text-gray-700">
+        <div>
+            <dt class="font-semibold text-gray-600">Venue Name</dt>
+            <dd>@Model.Name</dd>
+        </div>
+
+        <div>
+            <dt class="font-semibold text-gray-600">Location</dt>
+            <dd>@Model.Location</dd>
+        </div>
+
+        <div>
+        <dt class="col-sm-2">Description</dt>
+        <dd class="col-sm-10">@Html.DisplayFor(model => model.Description)</dd>
+        </div>
+
+        <div>
+            <dt class="font-semibold text-gray-600">Capacity</dt>
+            <dd>@Model.Capacity</dd>
+        </div>
+    </dl>
+
+    <div class="mt-8 flex justify-between">
+        <a asp-action="Index" class="text-gray-600 hover:underline">← Back to List</a>
+        <a asp-action="Edit" asp-route-id="@Model.VenueId"
+           class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md shadow-md transition">
+            Edit Venue
+        </a>
+    </div>
+</div>
