@@ -89,9 +89,10 @@ namespace StarEvents.Areas.Identity.Pages.Account
                 var user = CreateUser();
 
                 user.FullName = Input.FullName;
-                user.IsCustomer = true;  // ✅ default customer role
+                user.IsCustomer = true;   // ✅ default customer role
                 user.IsOrganizer = false;
-                user.IsActive = true;    // customer accounts are auto-active
+                user.IsActive = true;     // ✅ customers are auto-active
+                user.EmailConfirmed = false; // ✅ user still needs to confirm email
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -105,7 +106,7 @@ namespace StarEvents.Areas.Identity.Pages.Account
                     // ✅ Assign the "Customer" role automatically
                     await _userManager.AddToRoleAsync(user, "Customer");
 
-                    // ✅ Email confirmation setup
+                    // ✅ Send confirmation email
                     var userId = await _userManager.GetUserIdAsync(user);
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
                     code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
@@ -118,23 +119,19 @@ namespace StarEvents.Areas.Identity.Pages.Account
                     await _emailSender.SendEmailAsync(Input.Email, "Confirm your email",
                         $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>.");
 
-                    if (_userManager.Options.SignIn.RequireConfirmedAccount)
-                    {
-                        return RedirectToPage("RegisterConfirmation", new { email = Input.Email, returnUrl });
-                    }
-                    else
-                    {
-                        await _signInManager.SignInAsync(user, isPersistent: false);
-                        return LocalRedirect(returnUrl);
-                    }
+                    // ✅ Redirect directly to Login page after registration
+                    TempData["RegisterSuccess"] = "Registration successful! Please check your email and log in after confirming your account.";
+                    return RedirectToPage("/Account/Login");
                 }
 
+                // Handle validation errors
                 foreach (var error in result.Errors)
                     ModelState.AddModelError(string.Empty, error.Description);
             }
 
             return Page();
         }
+
 
         private AppUser CreateUser()
         {

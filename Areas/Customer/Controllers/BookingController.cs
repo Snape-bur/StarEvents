@@ -93,86 +93,120 @@ namespace StarEvents.Areas.Customer.Controllers
             return View(list);
         }
 
-        // ✅ Simulate payment
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Pay(int id)
+        // ✅ Show only upcoming (future) bookings
+        public async Task<IActionResult> Upcoming()
         {
             var user = await _userManager.GetUserAsync(User);
-            var booking = await _context.Bookings
+            var upcoming = await _context.Bookings
                 .Include(b => b.Event)
-                .FirstOrDefaultAsync(b => b.BookingId == id && b.CustomerId == user.Id);
+                .ThenInclude(e => e.Venue)
+                .Where(b => b.CustomerId == user.Id &&
+                            b.Event.StartDate >= DateTime.UtcNow &&
+                            b.Status == "Paid")
+                .OrderBy(b => b.Event.StartDate)
+                .ToListAsync();
 
-            if (booking == null)
-                return NotFound();
-
-            if (booking.Status != "Pending")
-            {
-                TempData["Error"] = "This booking cannot be paid again.";
-                return RedirectToAction(nameof(MyBookings));
-            }
-
-            // ✅ Step 1: Mark as paid
-            booking.Status = "Paid";
-
-            // ✅ Step 2: Generate QR code (mock mode)
-            string qrText = $"Booking:{booking.BookingId}|Event:{booking.Event.Title}|Customer:{user.Email}|Date:{DateTime.UtcNow:yyyy-MM-dd}";
-            using var qrGen = new QRCodeGenerator();
-            var qrData = qrGen.CreateQrCode(qrText, QRCodeGenerator.ECCLevel.Q);
-            using var qrCode = new QRCode(qrData);
-            using var bitmap = qrCode.GetGraphic(20);
-
-            // ✅ Step 3: Save to /wwwroot/qrcodes
-            var folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/qrcodes");
-            if (!Directory.Exists(folder))
-                Directory.CreateDirectory(folder);
-
-            var filePath = Path.Combine(folder, $"Booking_{booking.BookingId}.png");
-            bitmap.Save(filePath, System.Drawing.Imaging.ImageFormat.Png);
-
-
-            // ✅ Step 4: Store path in database
-            booking.QRCodePath = $"/qrcodes/Booking_{booking.BookingId}.png";
-
-            await _context.SaveChangesAsync();
-
-            TempData["Ok"] = $"Payment successful for {booking.Event.Title}. QR code generated!";
-            return RedirectToAction(nameof(MyBookings));
+            return View("MyBookings", upcoming); // reuse same view
         }
 
-
-        // ✅ Show all paid bookings
+        // ✅ Show only past / completed bookings
         public async Task<IActionResult> History()
         {
             var user = await _userManager.GetUserAsync(User);
-            var bookings = await _context.Bookings
+            var history = await _context.Bookings
                 .Include(b => b.Event)
                 .ThenInclude(e => e.Venue)
-                .Where(b => b.CustomerId == user.Id && b.Status == "Paid")
-                .OrderByDescending(b => b.BookingDate)
+                .Where(b => b.CustomerId == user.Id &&
+                            b.Event.StartDate < DateTime.UtcNow &&
+                            b.Status == "Paid")
+                .OrderByDescending(b => b.Event.StartDate)
                 .ToListAsync();
 
-            return View(bookings);
-        }
-
-        public async Task<IActionResult> Ticket(int id)
-        {
-            var user = await _userManager.GetUserAsync(User);
-            var booking = await _context.Bookings
-                .Include(b => b.Event)
-                .ThenInclude(e => e.Venue)
-                .FirstOrDefaultAsync(b => b.BookingId == id && b.CustomerId == user.Id);
-
-            if (booking == null)
-                return NotFound();
-
-            return View(booking);
+            return View("MyBookings", history);
         }
 
 
+        // ✅ Simulate payment
+        /* [HttpPost]
+         [ValidateAntiForgeryToken]
+         public async Task<IActionResult> Pay(int id)
+         {
+             var user = await _userManager.GetUserAsync(User);
+             var booking = await _context.Bookings
+                 .Include(b => b.Event)
+                 .FirstOrDefaultAsync(b => b.BookingId == id && b.CustomerId == user.Id);
+
+             if (booking == null)
+                 return NotFound();
+
+             if (booking.Status != "Pending")
+             {
+                 TempData["Error"] = "This booking cannot be paid again.";
+                 return RedirectToAction(nameof(MyBookings));
+             }
+
+             // ✅ Step 1: Mark as paid
+             booking.Status = "Paid";
+
+             // ✅ Step 2: Generate QR code (mock mode)
+             string qrText = $"Booking:{booking.BookingId}|Event:{booking.Event.Title}|Customer:{user.Email}|Date:{DateTime.UtcNow:yyyy-MM-dd}";
+             using var qrGen = new QRCodeGenerator();
+             var qrData = qrGen.CreateQrCode(qrText, QRCodeGenerator.ECCLevel.Q);
+             using var qrCode = new QRCode(qrData);
+             using var bitmap = qrCode.GetGraphic(20);
+
+             // ✅ Step 3: Save to /wwwroot/qrcodes
+             var folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/qrcodes");
+             if (!Directory.Exists(folder))
+                 Directory.CreateDirectory(folder);
+
+             var filePath = Path.Combine(folder, $"Booking_{booking.BookingId}.png");
+             bitmap.Save(filePath, System.Drawing.Imaging.ImageFormat.Png);
+
+
+             // ✅ Step 4: Store path in database
+             booking.QRCodePath = $"/qrcodes/Booking_{booking.BookingId}.png";
+
+             await _context.SaveChangesAsync();
+
+             TempData["Ok"] = $"Payment successful for {booking.Event.Title}. QR code generated!";
+             return RedirectToAction(nameof(MyBookings));
+         }
+
+
+         // ✅ Show all paid bookings
+         public async Task<IActionResult> History()
+         {
+             var user = await _userManager.GetUserAsync(User);
+             var bookings = await _context.Bookings
+                 .Include(b => b.Event)
+                 .ThenInclude(e => e.Venue)
+                 .Where(b => b.CustomerId == user.Id && b.Status == "Paid")
+                 .OrderByDescending(b => b.BookingDate)
+                 .ToListAsync();
+
+             return View(bookings);
+         }
+
+         public async Task<IActionResult> Ticket(int id)
+         {
+             var user = await _userManager.GetUserAsync(User);
+             var booking = await _context.Bookings
+                 .Include(b => b.Event)
+                 .ThenInclude(e => e.Venue)
+                 .FirstOrDefaultAsync(b => b.BookingId == id && b.CustomerId == user.Id);
+
+             if (booking == null)
+                 return NotFound();
+
+             return View(booking);
+         }
+        */
         [HttpGet]
         public async Task<IActionResult> DownloadTicket(int id)
         {
+            QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+
             var user = await _userManager.GetUserAsync(User);
             var booking = await _context.Bookings
                 .Include(b => b.Event)
@@ -184,7 +218,7 @@ namespace StarEvents.Areas.Customer.Controllers
 
             var qrPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "qrcodes", $"Booking_{booking.BookingId}.png");
             if (!System.IO.File.Exists(qrPath))
-                qrPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "placeholder-qr.png"); // optional fallback
+                qrPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "placeholder-qr.png");
 
             var pdf = Document.Create(container =>
             {
@@ -207,22 +241,16 @@ namespace StarEvents.Areas.Customer.Controllers
                     {
                         col.Spacing(10);
 
-                        // Event Title
                         col.Item().Text(booking.Event?.Title ?? "Event Title")
                             .Bold().FontSize(16).FontColor(Colors.Blue.Darken2);
 
-                        // Venue and Date
                         col.Item().Text($"📍 {booking.Event?.Venue?.Name ?? "Venue"}");
                         col.Item().Text($"📅 {booking.Event?.StartDate:dd MMM yyyy hh:mm tt}");
-
-                        // Customer Info
                         col.Item().Text($"👤 {user.FullName ?? user.Email}");
                         col.Item().Text($"💰 Total Paid: ${booking.TotalPrice:0.00}");
 
-                        // Separator
                         col.Item().PaddingVertical(10).LineHorizontal(1).LineColor(Colors.Grey.Lighten1);
 
-                        // QR Code and Info Row
                         col.Item().Row(row =>
                         {
                             row.Spacing(20);
@@ -239,7 +267,6 @@ namespace StarEvents.Areas.Customer.Controllers
                         });
                     });
 
-                    // ===== FOOTER =====
                     page.Footer().AlignCenter().Text(txt =>
                     {
                         txt.Span("© ").FontSize(10);
@@ -248,11 +275,14 @@ namespace StarEvents.Areas.Customer.Controllers
                 });
             });
 
-            // Output to MemoryStream
-            using var stream = new MemoryStream();
+            // ✅ FIX: Don’t use `using var` here.
+            var stream = new MemoryStream();
             pdf.GeneratePdf(stream);
+
+            // ✅ Reset position before returning
             stream.Position = 0;
 
+            // ✅ Return FileResult (ASP.NET will handle stream disposal)
             return File(stream, "application/pdf", $"Ticket_{booking.BookingId}.pdf");
         }
 

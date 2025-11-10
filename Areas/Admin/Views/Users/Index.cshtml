@@ -7,25 +7,39 @@
 <div class="p-6">
     <h1 class="text-2xl font-bold text-gray-800 mb-6">👥 User Management</h1>
 
-    <!-- ✅ Filter Bar -->
-    <form method="get" asp-action="Index" class="mb-6 flex flex-wrap items-center gap-3">
-        <select name="role"
-                class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
-            <option value="All">All Roles</option>
-            @foreach (var r in ViewBag.Roles)
-            {
-                <option value="@r" selected="@(ViewBag.SelectedRole == r)">
-                    @r
-                </option>
-            }
-        </select>
-        <button type="submit"
-                class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
-            Apply
-        </button>
-        <a asp-action="Index"
-           class="text-gray-600 hover:text-blue-600 ml-2 underline text-sm">Clear</a>
-    </form>
+    <!-- ✅ Filter & Button Bar -->
+    <div class="flex flex-wrap items-center justify-between mb-6">
+        <!-- Left: Filter Form -->
+        <form method="get" asp-action="Index" class="flex items-center gap-3">
+            <select name="role"
+                    class="border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:outline-none">
+                <option value="All">All Roles</option>
+                @foreach (var r in ViewBag.Roles)
+                {
+                    <option value="@r" selected="@(ViewBag.SelectedRole == r)">
+                        @r
+                    </option>
+                }
+            </select>
+
+            <button type="submit"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">
+                Apply
+            </button>
+
+            <a asp-action="Index"
+               class="text-gray-600 hover:text-blue-600 ml-2 underline text-sm">
+                Clear
+            </a>
+        </form>
+
+        <!-- Right: Create Button -->
+        <a asp-area="Admin" asp-controller="Users" asp-action="Create"
+           class="bg-blue-600 text-white font-semibold px-5 py-2 rounded-lg shadow hover:bg-blue-700 transition">
+            + Create Admin
+        </a>
+    </div>
+
 
     <!-- ✅ Table -->
     <div class="overflow-x-auto bg-white rounded-2xl shadow-md">

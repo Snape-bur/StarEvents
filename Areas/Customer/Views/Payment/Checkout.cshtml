@@ -1,0 +1,26 @@
+﻿@model StarEvents.Models.Booking
+@{
+    ViewData["Title"] = "Checkout";
+}
+<div class="max-w-xl mx-auto bg-white shadow-lg rounded-2xl p-8 mt-10">
+    <h2 class="text-2xl font-bold text-blue-700 mb-4">Checkout</h2>
+
+    <div class="border-b pb-3 mb-3">
+        <p class="text-gray-700"><strong>Event:</strong> @Model.Event?.Title</p>
+        <p class="text-gray-700"><strong>Date:</strong> @Model.Event?.StartDate.ToString("dd MMM yyyy hh:mm tt")</p>
+        <p class="text-gray-700"><strong>Tickets:</strong> @Model.Quantity</p>
+        <p class="text-gray-700"><strong>Total:</strong> $@Model.TotalPrice.ToString("0.00")</p>
+    </div>
+
+    <p class="text-gray-600 mb-6">Please confirm your payment to complete your booking.</p>
+
+    <form asp-action="Confirm" method="post">
+        <input type="hidden" name="id" value="@Model.BookingId" />
+        <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-6 py-3 rounded-md w-full transition">
+            Pay Now 💳
+        </button>
+    </form>
+
+    <a asp-area="Customer" asp-controller="Booking" asp-action="MyBookings"
+       class="block text-center text-gray-500 mt-4 hover:underline">Cancel</a>
+</div>

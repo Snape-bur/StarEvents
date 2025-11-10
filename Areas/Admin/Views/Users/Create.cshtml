@@ -1,0 +1,47 @@
+﻿@model StarEvents.Models.ViewModels.Admin.AddAdminUserViewModel
+
+@{
+    ViewData["Title"] = "Create Admin";
+}
+
+<div class="max-w-2xl mx-auto mt-10 bg-white shadow rounded-xl ring-1 ring-black/5 p-8">
+    <h2 class="text-2xl font-bold text-blue-700 mb-6">Create New Admin</h2>
+
+    @if (TempData["Success"] != null)
+    {
+        <div class="mb-4 p-3 bg-green-50 border border-green-200 text-green-700 rounded-lg">
+            @TempData["Success"]
+        </div>
+    }
+
+    <form asp-action="Create" method="post" class="space-y-5">
+        <div>
+            <label asp-for="FullName" class="block font-semibold text-gray-700 mb-1"></label>
+            <input asp-for="FullName" class="w-full border rounded-lg px-3 py-2 ring-1 ring-gray-200 focus:ring-blue-500" />
+            <span asp-validation-for="FullName" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div>
+            <label asp-for="Email" class="block font-semibold text-gray-700 mb-1"></label>
+            <input asp-for="Email" class="w-full border rounded-lg px-3 py-2 ring-1 ring-gray-200 focus:ring-blue-500" />
+            <span asp-validation-for="Email" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div>
+            <label asp-for="Password" class="block font-semibold text-gray-700 mb-1"></label>
+            <input asp-for="Password" class="w-full border rounded-lg px-3 py-2 ring-1 ring-gray-200 focus:ring-blue-500" />
+            <span asp-validation-for="Password" class="text-red-500 text-sm"></span>
+        </div>
+
+        <div>
+            <label asp-for="ConfirmPassword" class="block font-semibold text-gray-700 mb-1"></label>
+            <input asp-for="ConfirmPassword" class="w-full border rounded-lg px-3 py-2 ring-1 ring-gray-200 focus:ring-blue-500" />
+            <span asp-validation-for="ConfirmPassword" class="text-red-500 text-sm"></span>
+        </div>
+
+        <button type="submit" class="bg-blue-600 text-white font-semibold px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+            Create Admin
+        </button>
+        <a asp-action="Index" class="ml-3 text-blue-600 hover:underline">← Back to User List</a>
+    </form>
+</div>

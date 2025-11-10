@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using StarEvents.Models.Enums;
 
 namespace StarEvents.Models
 {
@@ -31,6 +32,8 @@ namespace StarEvents.Models
         // 🔹 Booking state
         [StringLength(50)]
         public string Status { get; set; } = "Pending"; // Pending, Paid, Cancelled
+
+        public PaymentStatus PaymentStatus { get; set; } = PaymentStatus.Pending;
 
         public DateTime BookingDate { get; set; } = DateTime.UtcNow;
 

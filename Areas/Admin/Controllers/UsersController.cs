@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using StarEvents.Models;
+using StarEvents.Models.ViewModels.Admin;
 
 namespace StarEvents.Areas.Admin.Controllers
 {
@@ -79,5 +80,62 @@ namespace StarEvents.Areas.Admin.Controllers
             await _userManager.DeleteAsync(user);
             return RedirectToAction(nameof(Index));
         }
+
+        // ✅ GET: Create Admin User
+        public IActionResult Create()
+        {
+            return View();
+        }
+
+        // ✅ POST: Create Admin User
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(AddAdminUserViewModel model)
+        {
+            if (!ModelState.IsValid)
+                return View(model);
+
+            // Ensure role exists
+            if (!await _roleManager.RoleExistsAsync("Admin"))
+                await _roleManager.CreateAsync(new IdentityRole("Admin"));
+
+            // Check if email already used
+            var existingUser = await _userManager.FindByEmailAsync(model.Email);
+            if (existingUser != null)
+            {
+                ModelState.AddModelError("", "An account with this email already exists.");
+                return View(model);
+            }
+
+            var user = new AppUser
+            {
+                FullName = model.FullName,
+                Email = model.Email,
+                UserName = model.Email,
+                IsActive = true,
+                EmailConfirmed = true,
+                IsOrganizer = false,
+                IsCustomer = false
+            };
+
+            var result = await _userManager.CreateAsync(user, model.Password);
+
+            if (result.Succeeded)
+            {
+                await _userManager.AddToRoleAsync(user, "Admin");
+                TempData["Success"] = $"Admin account for {user.Email} created successfully!";
+                return RedirectToAction(nameof(Index));
+            }
+
+            foreach (var error in result.Errors)
+                ModelState.AddModelError(string.Empty, error.Description);
+
+            return View(model);
+        }
+
+
+
+
+
     }
 }

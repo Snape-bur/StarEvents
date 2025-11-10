@@ -85,19 +85,49 @@
 
                             <!-- ✅ Action Buttons -->
                             <td class="px-6 py-4 text-center space-x-2">
+                                @* ✅ Pending booking — show Pay Now button *@
                                 @if (b.Status == "Pending")
                                 {
-                                    <button type="button"
-                                            x-on:click="openModal = true; selectedId = @b.BookingId; selectedEvent = '@b.Event?.Title'; selectedTotal = '@b.TotalPrice.ToString("0.00")'"
-                                            class="bg-blue-600 hover:bg-blue-700 text-white text-xs px-4 py-2 rounded-md shadow">
-                                        Pay Now
-                                    </button>
+                                    <a asp-area="Customer"
+                                       asp-controller="Payment"
+                                       asp-action="Checkout"
+                                       asp-route-id="@b.BookingId"
+                                       class="inline-block bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-md text-sm shadow transition">
+                                        💳 Pay Now
+                                    </a>
                                 }
+                                @* ✅ Paid booking — show Download QR and Ticket *@
                                 else if (b.Status == "Paid")
                                 {
-                                    <a href="@b.QRCodePath" download class="text-blue-600 hover:underline text-sm">Download QR</a>
+                                    <div class="flex flex-col items-center space-y-1">
+                                        @if (!string.IsNullOrEmpty(b.QRCodePath))
+                                        {
+                                            <a href="@b.QRCodePath"
+                                               download
+                                               class="text-blue-600 hover:underline text-sm">
+                                                📥 Download QR
+                                            </a>
+                                        }
+                                        <a asp-area="Customer"
+                                           asp-controller="Booking"
+                                           asp-action="DownloadTicket"
+                                           asp-route-id="@b.BookingId"
+                                           class="text-green-600 hover:underline text-sm">
+                                            🎫 Ticket PDF
+                                        </a>
+                                    </div>
+                                }
+                                @* ✅ Cancelled booking — show disabled state *@
+                                else if (b.Status == "Cancelled")
+                                {
+                                    <span class="text-red-500 italic text-sm">Cancelled</span>
+                                }
+                                else
+                                {
+                                    <span class="text-gray-400 text-sm italic">Unknown</span>
                                 }
                             </td>
+
 
                         </tr>
                     }

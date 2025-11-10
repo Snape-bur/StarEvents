@@ -55,22 +55,30 @@ namespace StarEvents.Areas.Admin.Controllers
             var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Id == id);
             if (user is null) return NotFound();
 
-            // ensure role exists
+            // Ensure the Organizer role exists
             if (!await _roleManager.RoleExistsAsync("Organizer"))
                 await _roleManager.CreateAsync(new IdentityRole("Organizer"));
 
-            // add to role if not already
+            // Add to Organizer role if not already
             if (!await _userManager.IsInRoleAsync(user, "Organizer"))
                 await _userManager.AddToRoleAsync(user, "Organizer");
 
+            // ✅ Activate & confirm the account
             user.IsOrganizer = true;
             user.IsActive = true;
+            user.EmailConfirmed = true;          // 🔥 IMPORTANT: allows login
             user.ApprovedAt = DateTime.UtcNow;
 
             await _userManager.UpdateAsync(user);
-            TempData["Ok"] = $"Approved organizer: {user.Email}";
+
+            // ✅ (Optional) send email notification to organizer
+            // await _emailSender.SendEmailAsync(user.Email, "Account Approved",
+            //     $"Hello {user.FullName}, your organizer account has been approved! You can now log in at {Url.Page("/Account/Login", new { area = "Identity" }, Request.Scheme)}.");
+
+            TempData["Ok"] = $"✅ Organizer {user.Email} has been approved and can now log in.";
             return RedirectToAction(nameof(Index));
         }
+
 
         // POST: Admin/Organizers/Suspend/{id}
         [HttpPost]

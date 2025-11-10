@@ -91,6 +91,7 @@ namespace StarEvents.Areas.Identity.Pages.Account
                 user.IsCustomer = false;
                 user.IsActive = false;       // requires admin approval
                 user.ApprovedAt = null;
+                user.EmailConfirmed = false; // organizer must confirm after admin approval
 
                 await _userStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
                 await _emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
