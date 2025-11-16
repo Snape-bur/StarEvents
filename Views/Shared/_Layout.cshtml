@@ -1,64 +1,489 @@
-﻿<!DOCTYPE html>
+﻿@*
+  StarEvent main layout.
+  This file contains:
+  - <head> (meta, fonts, Tailwind, styles)
+  - Sticky header + mobile menu
+  - Footer (with video mask)
+  - JS (animations, header behaviour, counters)
+  The main landing sections are rendered via @RenderBody() from Index.cshtml.
+*@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - StarEvents</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/StarEvents.styles.css" asp-append-version="true" />
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+    <title>StarEvent – Tickets for Concerts, Sports & Live Shows</title>
+    <meta name="description"
+          content="Find and book tickets for concerts, sports, theatre, and live events worldwide with StarEvent. Instant mobile tickets and a 100% buyer guarantee." />
+
+    <!-- Inter Font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+          rel="stylesheet" />
+
+    <!-- Tailwind CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+          theme: {
+            extend: {
+              fontFamily: {
+                sans: ["Inter", "ui-sans-serif", "system-ui"],
+              },
+              colors: {
+                primary: {
+                  50: "#f5f3ff",
+                  100: "#ede9fe",
+                  200: "#ddd6fe",
+                  300: "#c4b5fd",
+                  400: "#a78bfa",
+                  500: "#8b5cf6", // main violet
+                  600: "#7c3aed",
+                  700: "#6d28d9",
+                  800: "#5b21b6",
+                  900: "#4c1d95",
+                },
+              },
+              boxShadow: {
+                brand:
+                  "0 10px 30px -10px rgb(124 58 237 / 0.5)", // violet glow
+                lg: "0 10px 15px -3px rgba(0,0,0,0.08), 0 4px 6px -2px rgba(0,0,0,0.05)",
+                premium:
+                  "0 25px 50px -12px rgba(0, 0, 0, 0.25), 0 0 10px rgba(124,58,237,0.5)",
+              },
+            },
+          },
+        };
+    </script>
+
+    <style>
+        :root {
+            color-scheme: light;
+        }
+
+        html,
+        body {
+            scroll-behavior: smooth;
+        }
+
+        .backdrop-blur-12 {
+            backdrop-filter: blur(12px);
+        }
+
+        @@keyframes slow-spin {
+            from
+
+        {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(360deg);
+        }
+
+        }
+        @@keyframes slow-spin-reverse {
+            from
+
+        {
+            transform: rotate(0deg);
+        }
+
+        to {
+            transform: rotate(-360deg);
+        }
+
+        }
+
+        .animate-slow-spin {
+            animation: slow-spin 90s linear infinite;
+        }
+
+        .animate-slow-spin-reverse {
+            animation: slow-spin-reverse 90s linear infinite;
+        }
+
+        /* Base for scroll animation */
+        .animate-on-scroll {
+            transition-property: all;
+            transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+            transition-duration: 700ms;
+        }
+
+        /* Card Hover Effect */
+        .grid > .group:hover {
+            transform: translateY(-4px) scale(1.01);
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1), 0 0 15px rgba(124, 58, 237, 0.3);
+        }
+
+        /* Logo mask */
+        .logo-mask {
+            position: relative;
+            overflow: hidden;
+            width: 100%;
+            height: 240px;
+            mask-image: url("/images/starevent-logo1.svg");
+            -webkit-mask-image: url("/images/starevent-logo1.svg");
+            mask-repeat: no-repeat;
+            mask-position: center;
+            mask-size: contain;
+        }
+
+        .masked-video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .footer-logo {
+            background: linear-gradient(90deg, #ff6a00, #ee0979);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">StarEvents</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
-                    <ul class="navbar-nav">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Register">Register</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/RegisterOrganizer">Become an Organizer</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="Identity" asp-page="/Account/Login">Login</a>
-                        </li>
-                    </ul>
+
+<body class="bg-white text-gray-900">
+    <!-- HEADER (sticky) -->
+    <header id="mainHeader"
+            class="fixed inset-x-0 top-0 z-50 transition-all duration-300">
+        <div class="mx-auto max-w-6xl px-4">
+            <div id="headerContent"
+                 class="mt-6 flex h-16 items-center justify-between rounded-full bg-white/95 px-4 sm:px-6 backdrop-blur-md shadow-lg ring-1 ring-black/5 transition-all duration-300">
+                <!-- Left: Logo -->
+                <a href="#home" class="flex items-center">
+                    <span class="text-2xl font-extrabold tracking-tight">
+                        <span class="text-gray-900">Star</span><span class="text-primary-600">Event</span>
+                    </span>
+                </a>
+
+                <!-- Center: Nav (desktop) -->
+                <nav class="hidden items-center gap-10 text-sm font-medium text-gray-700 md:flex">
+                    <a href="#home" class="transition hover:text-primary-600">Home</a>
+                    <a href="#events" class="transition hover:text-primary-600">Events</a>
+                    <a href="#cities" class="transition hover:text-primary-600">Cities</a>
+                    <a href="#faq" class="transition hover:text-primary-600">FAQ</a>
+                    <a href="#contact" class="transition hover:text-primary-600">Contact</a>
+                </nav>
+
+                <!-- Right: Auth Buttons (desktop) -->
+                <div class="hidden md:flex items-center gap-3">
+
+                    <!-- Register -->
+                    <a asp-area="Identity" asp-page="/Account/Register"
+                       class="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-primary-600 transition">
+                        Register
+                    </a>
+
+                    <!-- Become Organizer (premium minimal button) -->
+                    <a asp-area="Identity" asp-page="/Account/RegisterOrganizer"
+                       class="rounded-full bg-primary-600/90 px-4 py-1.5 text-sm font-semibold text-white shadow-brand
+              hover:bg-primary-700 hover:shadow-lg hover:shadow-primary-500/30
+              transition-all duration-200 active:scale-95">
+                        Organizer
+                    </a>
+
+                    <!-- Login -->
+                    <a asp-area="Identity" asp-page="/Account/Login"
+                       class="px-3 py-1.5 text-sm font-medium text-gray-700 hover:text-primary-600 transition">
+                        Login
+                    </a>
 
                 </div>
 
 
-            </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
-            @RenderBody()
-        </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2025 - StarEvents - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                <div id="mobileMenu" class="hidden md:hidden">
+                    <div class="mx-auto mt-3 max-w-6xl px-4">
+                        <div class="rounded-2xl bg-white/95 p-4 font-medium text-gray-700 shadow-xl ring-1 ring-black/5 backdrop-blur-md">
+
+                            <a href="#home" class="block py-2 hover:text-primary-600">Home</a>
+                            <a href="#events" class="block py-2 hover:text-primary-600">Events</a>
+                            <a href="#cities" class="block py-2 hover:text-primary-600">Cities</a>
+                            <a href="#faq" class="block py-2 hover:text-primary-600">FAQ</a>
+                            <a href="#contact" class="block py-2 hover:text-primary-600">Contact</a>
+
+                            <hr class="my-3 border-gray-200" />
+
+                            <a asp-area="Identity" asp-page="/Account/Register"
+                               class="block py-2 hover:text-primary-600">
+                                Register
+                            </a>
+
+                            <a asp-area="Identity" asp-page="/Account/RegisterOrganizer"
+                               class="block py-2 hover:text-primary-600 font-semibold text-primary-600">
+                                Become an Organizer
+                            </a>
+
+                            <a asp-area="Identity" asp-page="/Account/Login"
+                               class="block py-2 hover:text-primary-600">
+                                Login
+                            </a>
+
+                        </div>
+                    </div>
+                </div>
+
+
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden md:hidden">
+            <div class="mx-auto mt-3 max-w-6xl px-4">
+                <div class="rounded-2xl bg-white/95 p-4 font-medium text-gray-700 shadow-xl ring-1 ring-black/5 backdrop-blur-md">
+                    <a href="#home"
+                       class="block py-2 transition hover:text-primary-600">Home</a>
+                    <a href="#events"
+                       class="block py-2 transition hover:text-primary-600">Events</a>
+                    <a href="#cities"
+                       class="block py-2 transition hover:text-primary-600">Cities</a>
+                    <a href="#faq"
+                       class="block py-2 transition hover:text-primary-600">FAQ</a>
+                    <a href="#contact"
+                       class="block py-2 transition hover:text-primary-600">Contact</a>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- MAIN CONTENT (from views like Index.cshtml) -->
+    <main>
+        @RenderBody()
+    </main>
+
+    <!-- FOOTER -->
+    <footer id="contact"
+            class="border-t bg-white py-16">
+        <!-- Masked logo video -->
+        <div class="mx-auto mb-10 max-w-5xl">
+            <div class="logo-mask">
+                <video class="masked-video"
+                       autoplay
+                       muted
+                       loop
+                       playsinline
+                       preload="metadata"
+                       src="/images/starevent-mask.mp4">
+                </video>
+            </div>
+        </div>
+
+        <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <!-- Footer Link Grid -->
+            <div class="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
+                <!-- Column 1 -->
+                <div>
+                    <h4 class="mb-3 font-semibold text-gray-800">Events</h4>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li>
+                            <a class="transition hover:text-primary-600" href="#">Concerts</a>
+                        </li>
+                        <li>
+                            <a class="transition hover:text-primary-600" href="#">Sports</a>
+                        </li>
+                        <li>
+                            <a class="transition hover:text-primary-600" href="#">Theatre</a>
+                        </li>
+                        <li>
+                            <a class="transition hover:text-primary-600" href="#">Festivals</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Column 2 -->
+                <div>
+                    <h4 class="mb-3 font-semibold text-gray-800">
+                        Account &amp; Support
+                    </h4>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li>
+                            <a class="transition hover:text-primary-600" href="#">Help Center</a>
+                        </li>
+                        <li>
+                            <a class="transition hover:text-primary-600" href="#">Sell Tickets</a>
+                        </li>
+                        <li>
+                            <a class="transition hover:text-primary-600" href="#">Safety Guarantee</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Column 3 -->
+                <div>
+                    <h4 class="mb-3 font-semibold text-gray-800">Company</h4>
+                    <ul class="space-y-2 text-sm text-gray-600">
+                        <li>
+                            <a class="transition hover:text-primary-600" href="#">About Us</a>
+                        </li>
+                        <li>
+                            <a class="transition hover:text-primary-600" href="#">Careers</a>
+                        </li>
+                        <li>
+                            <a class="transition hover:text-primary-600" href="#">Contact</a>
+                        </li>
+                        <li>
+                            <a class="transition hover:text-primary-600" href="#">FAQs</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Column 4 -->
+                <div>
+                    <h4 class="mb-3 font-semibold text-gray-800">Get the App</h4>
+                    <div class="flex gap-3">
+                        <a href="#"
+                           class="inline-flex items-center justify-center rounded-xl border px-4 py-2 text-sm font-semibold transition hover:bg-gray-100">App Store</a>
+                        <a href="#"
+                           class="inline-flex items-center justify-center rounded-xl border px-4 py-2 text-sm font-semibold transition hover:bg-gray-100">Google Play</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bottom Row -->
+            <div class="mt-14 flex flex-col items-center justify-between gap-4 border-t pt-6 text-sm text-gray-500 sm:flex-row">
+                <p>
+                    © <span id="year"></span> StarEvent LLC. All rights reserved.
+                </p>
+                <div class="flex gap-4">
+                    <a href="#" class="transition hover:text-primary-600">Facebook</a>
+                    <a href="#" class="transition hover:text-primary-600">Instagram</a>
+                    <a href="#" class="transition hover:text-primary-600">X (Twitter)</a>
+                </div>
+            </div>
         </div>
     </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+
+    <!-- JS: Animations, header, counters -->
+    <script>
+        function setupIntersectionObserver() {
+          const observerOptions = {
+            root: null,
+            rootMargin: "0px",
+            threshold: 0.1,
+          };
+
+          const observer = new IntersectionObserver((entries, obs) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                const elements =
+                  entry.target.querySelectorAll(".animate-on-scroll");
+
+                elements.forEach((el) => {
+                  const delay =
+                    parseInt(el.getAttribute("data-scroll-delay")) || 0;
+
+                  setTimeout(() => {
+                    el.classList.remove("opacity-0", "translate-y-6");
+                    el.classList.add("opacity-100", "translate-y-0");
+                  }, delay);
+                });
+
+                obs.unobserve(entry.target);
+              }
+            });
+          }, observerOptions);
+
+          document
+            .querySelectorAll(
+              "#services, #events, #cities, #insights, #faq, #cta"
+            )
+            .forEach((section) => observer.observe(section));
+        }
+
+        function setupHeaderScroll() {
+          const headerContent = document.getElementById("headerContent");
+          if (!headerContent) return;
+
+          const baseClasses = ["mt-6", "shadow-lg"];
+          const stickyClasses = ["mt-2", "shadow-xl", "bg-white"];
+
+          window.addEventListener("scroll", () => {
+            if (window.scrollY > 100) {
+              headerContent.classList.remove(...baseClasses);
+              headerContent.classList.add(...stickyClasses);
+            } else {
+              headerContent.classList.remove(...stickyClasses);
+              headerContent.classList.add(...baseClasses);
+              headerContent.classList.add("bg-white/95");
+            }
+          });
+        }
+
+        function setupMobileMenu() {
+          const menuBtn = document.getElementById("menuBtn");
+          const mobileMenu = document.getElementById("mobileMenu");
+          const menuIconOpen = document.getElementById("menuIconOpen");
+          const menuIconClose = document.getElementById("menuIconClose");
+
+          if (!menuBtn || !mobileMenu) return;
+
+          menuBtn.addEventListener("click", () => {
+            mobileMenu.classList.toggle("hidden");
+            menuIconOpen?.classList.toggle("hidden");
+            menuIconClose?.classList.toggle("hidden");
+          });
+        }
+
+        function setupCounters() {
+          const counters = document.querySelectorAll(".counter");
+          if (!counters.length) return;
+
+          let animated = false;
+
+          const startCount = () => {
+            if (animated) return;
+            counters.forEach((counter) => {
+              const animate = () => {
+                const target = +counter.dataset.target;
+                const current = +counter.innerText;
+                const increment = target / 60;
+
+                if (current < target) {
+                  counter.innerText = Math.ceil(current + increment);
+                  requestAnimationFrame(animate);
+                } else {
+                  counter.innerText = target;
+                }
+              };
+              animate();
+            });
+            animated = true;
+          };
+
+          const section = document.getElementById("insights");
+          if (!section) return;
+
+          const observer = new IntersectionObserver(
+            (entries) => {
+              if (entries[0]?.isIntersecting) startCount();
+            },
+            { threshold: 0.2 }
+          );
+
+          observer.observe(section);
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+          setupIntersectionObserver();
+          setupHeaderScroll();
+          setupMobileMenu();
+          setupCounters();
+
+          const eventDate = document.getElementById("eventDate");
+          if (eventDate) {
+            const today = new Date();
+            const iso = (d) => d.toISOString().split("T")[0];
+            eventDate.min = iso(today);
+          }
+
+          const yearSpan = document.getElementById("year");
+          if (yearSpan) {
+            yearSpan.textContent = new Date().getFullYear();
+          }
+        });
+    </script>
+
+    @RenderSection("Scripts", required: false)
 </body>
 </html>

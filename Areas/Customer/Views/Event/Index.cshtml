@@ -4,80 +4,138 @@
     ViewData["Title"] = "Events";
 }
 
-<div class="max-w-7xl mx-auto mt-10 px-4">
-    <h2 class="text-3xl font-bold text-blue-700 mb-6">Upcoming Events</h2>
+<div class="max-w-7xl mx-auto mt-12 px-4">
+
+    <!-- 🔹 Page Header -->
+    <div class="flex justify-between items-center mb-8">
+        <h2 class="text-3xl font-extrabold tracking-tight text-primary-600">
+            🎟️ Upcoming Events
+        </h2>
+        <p class="text-gray-500 text-sm">Browse and discover events happening near you</p>
+    </div>
 
     <!-- 🔍 Filters -->
-    <form method="get" class="bg-white rounded-xl shadow ring-1 ring-black/5 p-5 mb-6 grid grid-cols-1 md:grid-cols-6 gap-3">
-        <input type="text" name="Keyword" value="@Model.Keyword" placeholder="Search title, venue, location..."
-               class="md:col-span-2 border rounded-lg px-3 py-2" />
+    <form method="get"
+          class="bg-white rounded-3xl shadow-xl ring-1 ring-gray-200 p-6 mb-10
+                 grid grid-cols-1 md:grid-cols-6 gap-4">
 
-        <select name="CategoryId" class="border rounded-lg px-3 py-2">
+        <!-- Keyword -->
+        <input type="text"
+               name="Keyword"
+               value="@Model.Keyword"
+               placeholder="Search title, venue, category..."
+               class="md:col-span-2 rounded-xl border border-gray-300 px-4 py-3
+                      text-gray-900 placeholder:text-gray-400
+                      focus:border-primary-500 focus:ring-2 focus:ring-primary-300 transition" />
+
+        <!-- Category -->
+        <select name="CategoryId"
+                class="rounded-xl border border-gray-300 px-4 py-3 text-gray-900
+                       focus:ring-2 focus:ring-primary-300 focus:border-primary-500 transition">
             <option value="">All Categories</option>
             @foreach (var c in Model.Categories)
             {
-                <option value="@c.Value" selected="@(Model.CategoryId?.ToString()==c.Value)">
+                <option value="@c.Value" selected="@(Model.CategoryId?.ToString() == c.Value)">
                     @c.Text
                 </option>
             }
         </select>
 
-        <select name="VenueId" class="border rounded-lg px-3 py-2">
+        <!-- Venue -->
+        <select name="VenueId"
+                class="rounded-xl border border-gray-300 px-4 py-3 text-gray-900
+                       focus:ring-2 focus:ring-primary-300 focus:border-primary-500 transition">
             <option value="">All Venues</option>
             @foreach (var v in Model.Venues)
             {
-                <option value="@v.Value" selected="@(Model.VenueId?.ToString()==v.Value)">
+                <option value="@v.Value" selected="@(Model.VenueId?.ToString() == v.Value)">
                     @v.Text
                 </option>
             }
         </select>
 
-        <input type="date" name="DateFrom" value="@(Model.DateFrom?.ToString("yyyy-MM-dd"))"
-               class="border rounded-lg px-3 py-2" />
-        <input type="date" name="DateTo" value="@(Model.DateTo?.ToString("yyyy-MM-dd"))"
-               class="border rounded-lg px-3 py-2" />
+        <!-- Dates -->
+        <input type="date"
+               name="DateFrom"
+               value="@(Model.DateFrom?.ToString("yyyy-MM-dd"))"
+               class="rounded-xl border border-gray-300 px-4 py-3
+                      focus:ring-2 focus:ring-primary-300 focus:border-primary-500 transition" />
 
-        <div class="md:col-span-4 flex gap-3">
-            <button class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md">Search</button>
-            <a href="@Url.Action("Index", "Event", new { area = "Customer" })"
-               class="px-4 py-2 rounded-md border">Reset</a>
+        <input type="date"
+               name="DateTo"
+               value="@(Model.DateTo?.ToString("yyyy-MM-dd"))"
+               class="rounded-xl border border-gray-300 px-4 py-3
+                      focus:ring-2 focus:ring-primary-300 focus:border-primary-500 transition" />
+
+        <!-- Search Button -->
+        <div class="md:col-span-6 flex justify-end">
+            <button class="rounded-xl bg-primary-600 px-6 py-3 text-white font-semibold
+                           shadow-lg shadow-primary-600/30 hover:bg-primary-700
+                           active:scale-[0.98] transition">
+                Search
+            </button>
         </div>
     </form>
 
-    <!-- 🎟 Event List -->
+    <!-- 🔹 Results -->
     @if (Model.Results == null || Model.Results.Count == 0)
     {
-        <p class="text-gray-500 text-center py-10">No events found.</p>
+        <div class="text-center py-16 text-gray-500 text-lg">
+            No events found. Try adjusting your filters.
+        </div>
     }
     else
     {
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+
             @foreach (var e in Model.Results)
             {
-                <div class="bg-white rounded-2xl shadow ring-1 ring-black/5 p-5 flex flex-col justify-between">
-                    <div>
+                <div class="bg-white rounded-3xl shadow-xl ring-1 ring-gray-200 p-6
+                                    hover:shadow-2xl transition transform hover:-translate-y-1">
+
+                    <!-- Title + Category -->
+                    <div class="mb-4">
                         <h3 class="text-xl font-semibold text-gray-900">@e.Title</h3>
-                        <p class="text-gray-500 text-sm mt-1">@e.Venue?.Name</p>
-                        <p class="text-gray-600 mt-2">@e.Description?.Substring(0, Math.Min(100, e.Description.Length))...</p>
+                        <p class="text-sm text-gray-500">@e.Category?.Name</p>
                     </div>
 
-                    <div class="mt-4 text-sm text-gray-500">
-                        <p><strong>Date:</strong> @e.StartDate.ToString("MMM dd, yyyy")</p>
-                        <p><strong>Price:</strong> $@e.TicketPrice.ToString("0.00")</p>
-                        <p><strong>Available:</strong> @e.AvailableSeats seats</p>
+                    <!-- Description -->
+                    <p class="text-gray-600 text-sm leading-relaxed mb-4 line-clamp-3">
+                        @e.Description
+                    </p>
+
+                    <!-- Venue & Date -->
+                    <div class="text-sm text-gray-700 space-y-1 mb-4">
+                        <p>📍 <span class="font-medium">@e.Venue?.Name</span>, @e.Venue?.Location</p>
+                        <p>🗓️ @e.StartDate.ToString("MMM dd, yyyy")</p>
                     </div>
 
-                    <div class="mt-6 flex justify-between items-center">
-                        <a asp-action="Details" asp-route-id="@e.EventId"
-                           class="text-blue-600 hover:underline">View Details</a>
+                    <!-- Price -->
+                    <p class="text-lg font-semibold text-primary-600">
+                        💲@e.TicketPrice.ToString("0.00")
+                    </p>
 
-                        <a asp-area="Customer" asp-controller="Booking" asp-action="Create" asp-route-id="@e.EventId"
-                           class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md shadow-md transition">
+                    <!-- Actions -->
+                    <div class="mt-5 flex justify-between items-center">
+                        <a asp-action="Details"
+                           asp-route-id="@e.EventId"
+                           class="text-primary-600 hover:text-primary-700 font-medium transition">
+                            View Details
+                        </a>
+
+                        <a asp-area="Customer"
+                           asp-controller="Booking"
+                           asp-action="Create"
+                           asp-route-id="@e.EventId"
+                           class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2
+                                          rounded-xl shadow-md shadow-primary-600/20 transition active:scale-[0.97]">
                             Book Now
                         </a>
                     </div>
+
                 </div>
             }
+
         </div>
     }
 </div>

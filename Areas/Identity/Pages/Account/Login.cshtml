@@ -1,61 +1,90 @@
 ﻿@page
 @model StarEvents.Areas.Identity.Pages.Account.LoginModel
 @{
+    Layout = "/Areas/Identity/Pages/Shared/_AuthLayout.cshtml";
     ViewData["Title"] = "Login";
-    Layout = "/Areas/Identity/Pages/Shared/_AuthLayout.cshtml"; // optional layout for auth pages
 }
 
-<div class="d-flex justify-content-center align-items-center min-vh-100 bg-light">
-    <div class="card shadow-lg border-0 rounded-4" style="max-width: 420px; width: 100%;">
-        <div class="card-body p-4 p-sm-5">
+<div class="w-full max-w-md bg-white/95 backdrop-blur-xl rounded-2xl
+            border border-gray-200 shadow-glow p-8">
 
-            <!-- Header -->
-            <div class="text-center mb-4">
-                <h3 class="fw-bold text-primary">StarEvents</h3>
-                <p class="text-muted mb-0">Welcome back! Please log in to continue.</p>
-            </div>
-
-            <!-- Validation summary -->
-            <div asp-validation-summary="All" class="text-danger mb-3"></div>
-
-            <!-- Login Form -->
-            <form method="post">
-                <div class="mb-3">
-                    <label asp-for="Input.Email" class="form-label fw-semibold">Email address</label>
-                    <input asp-for="Input.Email" class="form-control form-control-lg" autocomplete="username" placeholder="name@example.com" />
-                    <span asp-validation-for="Input.Email" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Input.Password" class="form-label fw-semibold">Password</label>
-                    <input asp-for="Input.Password" class="form-control form-control-lg" autocomplete="current-password" placeholder="••••••••" />
-                    <span asp-validation-for="Input.Password" class="text-danger"></span>
-                </div>
-
-                <div class="form-check mb-4">
-                    <input asp-for="Input.RememberMe" class="form-check-input" />
-                    <label asp-for="Input.RememberMe" class="form-check-label"></label>
-                </div>
-
-                <div class="d-grid mb-3">
-                    <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm">Sign In</button>
-                </div>
-            </form>
-
-            <!-- Footer Links -->
-            <div class="text-center mt-3 small">
-                <p class="mb-1">Don't have an account?</p>
-                <a asp-page="/Account/Register" class="text-decoration-none fw-semibold text-primary">Register as Customer</a>
-                <span class="mx-1 text-muted">|</span>
-                <a asp-page="/Account/RegisterOrganizer" class="text-decoration-none fw-semibold text-success">Become an Organizer</a>
-            </div>
-
-            <div class="text-center mt-4 small">
-                <a asp-page="/Account/ForgotPassword" class="text-muted text-decoration-none">Forgot your password?</a>
-            </div>
-        </div>
+    <!-- Header -->
+    <div class="text-center mb-6">
+        <a asp-controller="Home" asp-action="Index"
+           class="inline-flex items-center justify-center gap-1">
+            <span class="text-3xl font-extrabold tracking-tight">
+                <span class="text-gray-900">Star</span><span class="text-primary-600">Event</span>
+            </span>
+        </a>
+        <p class="mt-3 text-sm text-gray-500">Experience events — effortlessly elegant.</p>
     </div>
+
+    <!-- Validation -->
+    <div asp-validation-summary="All" class="text-red-500 text-sm mb-3"></div>
+
+    <!-- Form -->
+    <form method="post" class="space-y-5">
+
+        <!-- Email -->
+        <div>
+            <label asp-for="Input.Email" class="block text-sm font-medium text-gray-700">Email</label>
+            <input asp-for="Input.Email"
+                   placeholder="name@example.com"
+                   class="mt-1 w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5
+                          text-gray-900 placeholder-gray-400 text-sm
+                          focus:ring-2 focus:ring-primary-300 focus:border-primary-500" />
+            <span asp-validation-for="Input.Email" class="text-red-500 text-xs"></span>
+        </div>
+
+        <!-- Password -->
+        <div>
+            <label asp-for="Input.Password" class="block text-sm font-medium text-gray-700">Password</label>
+            <input asp-for="Input.Password"
+                   placeholder="••••••"
+                   class="mt-1 w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5
+                          text-gray-900 placeholder-gray-400 text-sm
+                          focus:ring-2 focus:ring-primary-300 focus:border-primary-500" />
+            <span asp-validation-for="Input.Password" class="text-red-500 text-xs"></span>
+        </div>
+
+        <!-- Remember + Forgot -->
+        <div class="flex items-center justify-between text-sm">
+            <div class="flex items-center gap-2">
+                <input asp-for="Input.RememberMe"
+                       class="h-4 w-4 rounded border-gray-400 text-primary-600 focus:ring-primary-500" />
+                <label asp-for="Input.RememberMe" class="text-gray-700">
+                </label>
+            </div>
+
+            <a asp-page="/Account/ForgotPassword"
+               class="text-primary-600 hover:text-primary-700">Forgot password?</a>
+        </div>
+
+        <!-- Login button -->
+        <button type="submit"
+                class="w-full rounded-xl bg-gradient-to-r from-primary-600 to-primary-700
+                       text-white py-2.5 font-semibold
+                       shadow-lg shadow-primary-600/30
+                       hover:shadow-primary-700/40 hover:scale-[1.01]
+                       active:scale-[0.98] transition-all">
+            Log in
+        </button>
+
+    </form>
+
+    <!-- Links --> <div class="text-center mt-6 space-y-2 text-sm"> 
+        <p class="text-gray-600">Don't have an account?</p> 
+        <div class="flex justify-center gap-4 font-semibold"> 
+            <a asp-page="/Account/Register" class="text-primary-600 hover:text-primary-700">
+                Register as Customer </a> <span class="text-gray-400">|</span> 
+                <a asp-page="/Account/RegisterOrganizer" class="text-emerald-600 hover:text-emerald-700"> 
+                    Organizer Signup </a>
+                    </div>
+                    <a asp-page="/Account/ForgotPassword" class="text-gray-500 hover:text-primary-600"> 
+                        Forgot your password? </a> 
+                        </div>
 </div>
+
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

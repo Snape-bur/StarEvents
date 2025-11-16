@@ -7,72 +7,110 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@ViewData["Title"] - StarEvents</title>
+    <title>@ViewData["Title"] - StarEvent</title>
+
+    <!-- Tailwind -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            50: "#f5f3ff",
+                            100: "#ede9fe",
+                            200: "#ddd6fe",
+                            300: "#c4b5fd",
+                            400: "#a78bfa",
+                            500: "#8b5cf6",
+                            600: "#7c3aed",
+                            700: "#6d28d9",
+                            800: "#5b21b6",
+                            900: "#4c1d95",
+                        }
+                    },
+                    boxShadow: {
+                        card: "0 8px 30px rgba(0,0,0,0.06)",
+                    }
+                }
+            }
+        }
+    </script>
 </head>
+
 <body class="bg-gray-50 text-gray-800">
 
-    <!-- 🌟 Navbar -->
-    <header class="bg-white/90 backdrop-blur-md shadow-md sticky top-0 z-50">
+    <!-- 🌟 NAVBAR -->
+    <header class="bg-white/80 backdrop-blur-xl shadow-sm sticky top-0 z-50">
         <nav class="max-w-7xl mx-auto flex justify-between items-center py-3 px-6">
-            <!-- ✅ Logo -->
+
+            <!-- LOGO -->
             <a asp-area="Customer" asp-controller="Home" asp-action="Index"
-               class="text-2xl font-extrabold tracking-tight text-blue-600">
-                Star<span class="text-gray-800">Events</span>
+               class="text-3xl font-extrabold tracking-tight">
+                <span class="text-2xl font-extrabold tracking-tight">
+                    <span class="text-gray-900">Star</span><span class="text-primary-600">Event</span>
+                </span>*
             </a>
 
-            <!-- ✅ Nav Links -->
-            <ul class="hidden md:flex items-center space-x-8 font-medium text-gray-700">
-                <ul class="flex items-center space-x-6 text-sm font-medium text-gray-700">
-                    <!-- 🏠 Home -->
-                    <li>
-                        <a asp-area="Customer" asp-controller="Home" asp-action="Index"
-                           class="@(ViewContext.RouteData.Values["controller"].ToString() == "Home" ? "text-blue-600 font-semibold border-b-2 border-blue-600 pb-1" : "hover:text-blue-600 transition")">
-                            Home
-                        </a>
-                    </li>
+            <!-- NAV LINKS -->
+            <ul class="hidden md:flex items-center space-x-8 text-sm font-medium text-gray-700">
 
-                    <!-- 🎫 Events -->
-                    <li>
-                        <a asp-area="Customer" asp-controller="Event" asp-action="Index"
-                           class="@(ViewContext.RouteData.Values["controller"].ToString() == "Event" ? "text-blue-600 font-semibold border-b-2 border-blue-600 pb-1" : "hover:text-blue-600 transition")">
-                            Events
-                        </a>
-                    </li>
+                <!-- HOME -->
+                <li>
+                    <a asp-area="Customer" asp-controller="Home" asp-action="Index"
+                       class="@(ViewContext.RouteData.Values["controller"].ToString()=="Home"
+                                                   ? "text-primary-600 font-semibold border-b-2 border-primary-600 pb-1"
+                                                   : "hover:text-primary-600 transition")">
+                        Home
+                    </a>
+                </li>
 
-                    <!-- 📦 My Bookings -->
-                    <li>
-                        <a asp-area="Customer" asp-controller="Booking" asp-action="MyBookings"
-                           class="@(ViewContext.RouteData.Values["action"].ToString() == "MyBookings" ? "text-blue-600 font-semibold border-b-2 border-blue-600 pb-1" : "hover:text-blue-600 transition")">
-                            My Bookings
-                        </a>
-                    </li>
+                <!-- EVENTS -->
+                <li>
+                    <a asp-area="Customer" asp-controller="Event" asp-action="Index"
+                       class="@(ViewContext.RouteData.Values["controller"].ToString()=="Event"
+                                                   ? "text-primary-600 font-semibold border-b-2 border-primary-600 pb-1"
+                                                   : "hover:text-primary-600 transition")">
+                        Events
+                    </a>
+                </li>
 
-                    <!-- 🕒 Booking History -->
-                    <li>
-                        <a asp-area="Customer" asp-controller="Booking" asp-action="History"
-                           class="@(ViewContext.RouteData.Values["action"].ToString() == "History" ? "text-blue-600 font-semibold border-b-2 border-blue-600 pb-1" : "hover:text-blue-600 transition")">
-                            History
-                        </a>
-                    </li>
-                    <!-- Profile -->
-                    <li>
-                        <a asp-area="Customer" asp-controller="Profile" asp-action="Index"
-                           class="@(ViewContext.RouteData.Values["controller"].ToString() == "Profile" ? "text-blue-600 font-semibold border-b-2 border-blue-600 pb-1" : "hover:text-blue-600 transition")">
-                            Profile
-                            </a>
-                    </li>
+                <!-- MY BOOKINGS -->
+                <li>
+                    <a asp-area="Customer" asp-controller="Booking" asp-action="MyBookings"
+                       class="@(ViewContext.RouteData.Values["action"].ToString()=="MyBookings"
+                                                   ? "text-primary-600 font-semibold border-b-2 border-primary-600 pb-1"
+                                                   : "hover:text-primary-600 transition")">
+                        My Bookings
+                    </a>
+                </li>
 
+                <!-- HISTORY -->
+                <li>
+                    <a asp-area="Customer" asp-controller="Booking" asp-action="History"
+                       class="@(ViewContext.RouteData.Values["action"].ToString()=="History"
+                                                   ? "text-primary-600 font-semibold border-b-2 border-primary-600 pb-1"
+                                                   : "hover:text-primary-600 transition")">
+                        History
+                    </a>
+                </li>
 
-                </ul>
+                <!-- PROFILE -->
+                <li>
+                    <a asp-area="Customer" asp-controller="Profile" asp-action="Index"
+                       class="@(ViewContext.RouteData.Values["controller"].ToString()=="Profile"
+                                                   ? "text-primary-600 font-semibold border-b-2 border-primary-600 pb-1"
+                                                   : "hover:text-primary-600 transition")">
+                        Profile
+                    </a>
+                </li>
 
-                <!-- ✅ Auth Section -->
+                <!-- AUTH SECTION -->
                 @if (SignInManager.IsSignedIn(User))
                 {
                     <li class="text-gray-600">👤 @UserManager.GetUserName(User)</li>
                     <li>
-                        <form asp-area="Identity" asp-page="/Account/Logout"
-                              method="post" class="inline">
+                        <form asp-area="Identity" asp-page="/Account/Logout" method="post" class="inline">
                             <button type="submit"
                                     class="text-red-600 hover:text-red-700 transition">
                                 Logout
@@ -84,11 +122,11 @@
                 {
                     <li>
                         <a asp-area="Identity" asp-page="/Account/Login"
-                           class="text-blue-600 hover:text-blue-700 transition">Login</a>
+                           class="text-primary-600 hover:text-primary-700 transition">Login</a>
                     </li>
                     <li>
                         <a asp-area="Identity" asp-page="/Account/Register"
-                           class="bg-blue-600 text-white px-4 py-1.5 rounded-md hover:bg-blue-700 transition">
+                           class="bg-primary-600 text-white px-4 py-2 rounded-xl hover:bg-primary-700 transition">
                             Sign Up
                         </a>
                     </li>
@@ -97,29 +135,17 @@
         </nav>
     </header>
 
-    <!-- ✅ Main Body -->
+    <!-- MAIN BODY -->
     <main class="max-w-7xl mx-auto py-10 px-6">
-        @if (TempData["Ok"] != null)
-        {
-            <div class="mb-4 rounded-lg bg-green-50 border border-green-300 text-green-700 p-3 text-sm">
-                @TempData["Ok"]
-            </div>
-        }
-        @if (TempData["Error"] != null)
-        {
-            <div class="mb-4 rounded-lg bg-red-50 border border-red-300 text-red-700 p-3 text-sm">
-                @TempData["Error"]
-            </div>
-        }
-
         @RenderBody()
     </main>
 
-    <!-- ✅ Footer -->
+    <!-- FOOTER -->
     <footer class="bg-white border-t border-gray-200 py-6 mt-10 text-center text-sm text-gray-500">
-        © @DateTime.Now.Year StarEvents — All rights reserved.
+        © @DateTime.Now.Year StarEvent — All rights reserved.
     </footer>
 
     @RenderSection("Scripts", required: false)
+
 </body>
 </html>

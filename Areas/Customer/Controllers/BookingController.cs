@@ -229,9 +229,9 @@ namespace StarEvents.Areas.Customer.Controllers
                     page.DefaultTextStyle(x => x.FontSize(12).FontColor(Colors.Black));
 
                     // ===== HEADER =====
-                    page.Header().Background(Colors.Blue.Medium).Padding(10).Row(row =>
+                    page.Header().Background(Colors.DeepPurple.Medium).Padding(10).Row(row =>
                     {
-                        row.RelativeColumn().AlignLeft().Text("StarEvents")
+                        row.RelativeColumn().AlignLeft().Text("StarEvent")
                             .SemiBold().FontColor(Colors.White).FontSize(18);
                         row.ConstantColumn(60).Height(10);
                     });
@@ -242,7 +242,7 @@ namespace StarEvents.Areas.Customer.Controllers
                         col.Spacing(10);
 
                         col.Item().Text(booking.Event?.Title ?? "Event Title")
-                            .Bold().FontSize(16).FontColor(Colors.Blue.Darken2);
+                            .Bold().FontSize(16).FontColor(Colors.DeepPurple.Darken2);
 
                         col.Item().Text($"📍 {booking.Event?.Venue?.Name ?? "Venue"}");
                         col.Item().Text($"📅 {booking.Event?.StartDate:dd MMM yyyy hh:mm tt}");

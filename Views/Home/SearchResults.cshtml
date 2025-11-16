@@ -1,0 +1,74 @@
+﻿@model List<StarEvents.Models.Event>
+
+@{
+    ViewData["Title"] = "Search Results";
+}
+
+<div class="pt-28 mx-auto max-w-7xl px-4">
+
+    <!-- Title -->
+    <h2 class="text-2xl font-extrabold mb-6">
+        Results for:
+        <span class="text-primary-600">@Context.Request.Query["query"]</span>
+    </h2>
+
+    <!-- No Results -->
+    @if (!Model.Any())
+    {
+        <p class="text-gray-600">No events found. Try different keywords.</p>
+        return;
+    }
+
+    <!-- Events Grid -->
+    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+
+        @foreach (var e in Model)
+        {
+            <div class="rounded-2xl border border-gray-200 bg-white
+                            p-5 shadow-sm hover:shadow-lg transition">
+
+                <h3 class="text-lg font-bold text-gray-900">@e.Title</h3>
+
+                <p class="text-sm text-gray-600 mt-1">
+                    <span class="font-semibold">@e.StartDate.ToString("ddd, dd MMM yyyy")</span>
+                    <br />
+                    @e.Venue?.Name
+                </p>
+
+                <p class="mt-2 text-primary-700 font-extrabold text-xl">
+                    @e.TicketPrice.ToString("C")
+                    <span class="text-sm text-gray-500">per ticket</span>
+                </p>
+
+                <p class="text-sm text-gray-500 mt-1">
+                    @e.AvailableSeats seats available
+                </p>
+
+                <!-- BUTTONS -->
+                <div class="mt-4">
+
+                    @if (!User.Identity!.IsAuthenticated)
+                    {
+                        <a asp-area="Identity" asp-page="/Account/Login"
+                           class="block text-center rounded-xl bg-primary-600
+                                          text-white py-2 font-semibold hover:bg-primary-700
+                                          transition active:scale-[0.98]">
+                            Log in to Book Tickets
+                        </a>
+                    }
+                    else
+                    {
+                        <a asp-area="Customer" asp-controller="Booking"
+                           asp-action="Start" asp-route-id="@e.EventId"
+                           class="block text-center rounded-xl bg-primary-600
+                                          text-white py-2 font-semibold hover:bg-primary-700
+                                          transition active:scale-[0.98]">
+                            Get Tickets
+                        </a>
+                    }
+
+                </div>
+            </div>
+        }
+    </div>
+</div>

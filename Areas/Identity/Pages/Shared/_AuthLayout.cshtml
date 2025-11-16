@@ -1,15 +1,47 @@
-﻿<!DOCTYPE html>
+﻿@{
+    Layout = null;
+    var title = (string?)ViewData["Title"] ?? "StarEvent";
+}
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>@ViewData["Title"] - StarEvents</title>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <title>@title – StarEvent</title>
+
+    <!-- Tailwind -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: {
+                            500: '#8b5cf6',
+                            600: '#7c3aed',
+                            700: '#6d28d9'
+                        }
+                    },
+                    boxShadow: {
+                        glow: '0 0 28px rgba(139,92,246,0.35)' // violet glow
+                    }
+                }
+            }
+        }
+    </script>
 </head>
-<body class="bg-light text-dark">
-    @RenderBody()
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    @await RenderSectionAsync("Scripts", required: false)
+
+<body class="min-h-screen bg-gradient-to-br from-white via-gray-50 to-gray-100 text-gray-800">
+
+    <!-- radial violet glow background -->
+    <div class="pointer-events-none fixed inset-0
+                [background:radial-gradient(55%_45%_at_50%_20%,rgba(139,92,246,0.15),transparent_70%)]">
+    </div>
+
+    <main class="relative flex min-h-screen items-center justify-center p-4">
+        @RenderBody()
+    </main>
+
+    @RenderSection("Scripts", required: false)
 </body>
 </html>

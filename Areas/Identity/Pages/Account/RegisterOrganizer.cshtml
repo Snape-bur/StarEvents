@@ -5,65 +5,147 @@
     Layout = "/Areas/Identity/Pages/Shared/_AuthLayout.cshtml";
 }
 
-<div class="d-flex justify-content-center align-items-center min-vh-100 bg-light">
-    <div class="card shadow-lg border-0 rounded-4" style="max-width: 500px; width: 100%;">
-        <div class="card-body p-4 p-sm-5">
+<div class="w-full max-w-md bg-white/95 backdrop-blur-xl
+            rounded-2xl border border-gray-200 shadow-glow p-8">
 
-            <!-- Header -->
-            <div class="text-center mb-4">
-                <h3 class="fw-bold text-primary">StarEvents</h3>
-                <p class="text-muted mb-0">Register as an Event Organizer</p>
-            </div>
+    <!-- Header -->
+    <div class="text-center mb-6">
+        <a asp-controller="Home" asp-action="Index"
+           class="inline-flex items-center justify-center gap-1">
 
-            <!-- Validation -->
-            <div asp-validation-summary="All" class="text-danger mb-3"></div>
+            <span class="text-3xl font-extrabold tracking-tight">
+                <span class="text-gray-900">Star</span><span class="text-primary-600">Event</span>
+            </span>
+        </a>
 
-            <!-- Organizer Register Form -->
-            <form id="registerOrganizerForm" asp-route-returnUrl="@Model.ReturnUrl" method="post">
-                <div class="mb-3">
-                    <label asp-for="Input.FullName" class="form-label fw-semibold">Full Name</label>
-                    <input asp-for="Input.FullName" class="form-control form-control-lg" autocomplete="name" placeholder="John Doe" />
-                    <span asp-validation-for="Input.FullName" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Input.Email" class="form-label fw-semibold">Email address</label>
-                    <input asp-for="Input.Email" class="form-control form-control-lg" autocomplete="username" placeholder="name@example.com" />
-                    <span asp-validation-for="Input.Email" class="text-danger"></span>
-                </div>
-
-                <div class="mb-3">
-                    <label asp-for="Input.Password" class="form-label fw-semibold">Password</label>
-                    <input asp-for="Input.Password" class="form-control form-control-lg" autocomplete="new-password" placeholder="••••••••" />
-                    <span asp-validation-for="Input.Password" class="text-danger"></span>
-                </div>
-
-                <div class="mb-4">
-                    <label asp-for="Input.ConfirmPassword" class="form-label fw-semibold">Confirm Password</label>
-                    <input asp-for="Input.ConfirmPassword" class="form-control form-control-lg" autocomplete="new-password" placeholder="••••••••" />
-                    <span asp-validation-for="Input.ConfirmPassword" class="text-danger"></span>
-                </div>
-
-                <div class="d-grid mb-3">
-                    <button id="registerSubmit" type="submit" class="btn btn-success btn-lg rounded-pill shadow-sm">
-                        Register Organizer
-                    </button>
-                </div>
-            </form>
-
-            <!-- Footer Links -->
-            <div class="text-center mt-3 small">
-                <p class="mb-1">Want to book events instead?</p>
-                <a asp-page="/Account/Register" class="text-primary fw-semibold text-decoration-none">Register as Customer</a>
-                <span class="mx-1 text-muted">|</span>
-                <a asp-page="/Account/Login" class="text-primary fw-semibold text-decoration-none">Login</a>
-            </div>
-
-            <div class="text-center mt-3 small text-muted">
-                <p class="mb-0">Organizer accounts require admin approval before activation.</p>
-            </div>
-        </div>
+        <p class="mt-3 text-sm text-gray-500">
+            Register as an Event Organizer
+        </p>
     </div>
+
+    <!-- Validation -->
+    <div asp-validation-summary="All"
+         class="text-red-500 text-sm mb-3"></div>
+
+    <!-- Organizer Register Form -->
+    <form id="registerOrganizerForm"
+          asp-route-returnUrl="@Model.ReturnUrl"
+          method="post"
+          class="space-y-5">
+
+        <!-- Full Name -->
+        <div>
+            <label asp-for="Input.FullName"
+                   class="block text-sm font-semibold text-gray-700 mb-1">
+                Full Name
+            </label>
+
+            <input asp-for="Input.FullName"
+                   placeholder="John Doe"
+                   autocomplete="name"
+                   class="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5
+                          text-gray-900 text-sm placeholder-gray-400
+                          shadow-sm shadow-black/5
+                          focus:ring-2 focus:ring-primary-300 focus:border-primary-500 transition" />
+
+            <span asp-validation-for="Input.FullName"
+                  class="text-red-500 text-xs"></span>
+        </div>
+
+        <!-- Email -->
+        <div>
+            <label asp-for="Input.Email"
+                   class="block text-sm font-semibold text-gray-700 mb-1">
+                Email address
+            </label>
+
+            <input asp-for="Input.Email"
+                   placeholder="name@example.com"
+                   autocomplete="username"
+                   class="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5
+                          text-gray-900 text-sm placeholder-gray-400
+                          shadow-sm shadow-black/5
+                          focus:ring-2 focus:ring-primary-300 focus:border-primary-500 transition" />
+
+            <span asp-validation-for="Input.Email"
+                  class="text-red-500 text-xs"></span>
+        </div>
+
+        <!-- Password -->
+        <div>
+            <label asp-for="Input.Password"
+                   class="block text-sm font-semibold text-gray-700 mb-1">
+                Password
+            </label>
+
+            <input asp-for="Input.Password"
+                   placeholder="••••••••"
+                   autocomplete="new-password"
+                   class="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5
+                          text-gray-900 text-sm placeholder-gray-400
+                          shadow-sm shadow-black/5
+                          focus:ring-2 focus:ring-primary-300 focus:border-primary-500 transition" />
+
+            <span asp-validation-for="Input.Password"
+                  class="text-red-500 text-xs"></span>
+        </div>
+
+        <!-- Confirm Password -->
+        <div>
+            <label asp-for="Input.ConfirmPassword"
+                   class="block text-sm font-semibold text-gray-700 mb-1">
+                Confirm Password
+            </label>
+
+            <input asp-for="Input.ConfirmPassword"
+                   placeholder="••••••••"
+                   autocomplete="new-password"
+                   class="w-full rounded-xl border border-gray-300 bg-white px-4 py-2.5
+                          text-gray-900 text-sm placeholder-gray-400
+                          shadow-sm shadow-black/5
+                          focus:ring-2 focus:ring-primary-300 focus:border-primary-500 transition" />
+
+            <span asp-validation-for="Input.ConfirmPassword"
+                  class="text-red-500 text-xs"></span>
+        </div>
+
+        <!-- Submit Button -->
+        <button id="registerSubmit"
+                type="submit"
+                class="w-full rounded-xl bg-gradient-to-r
+                       from-emerald-600 to-emerald-700 text-white py-2.5
+                       font-semibold shadow-lg shadow-emerald-600/30
+                       hover:shadow-emerald-700/40 hover:scale-[1.01]
+                       active:scale-[0.98] transition-all">
+            Register Organizer
+        </button>
+
+    </form>
+
+    <!-- Footer Links -->
+    <div class="text-center mt-6 text-sm space-y-2">
+
+        <p class="text-gray-600">
+            Want to book events instead?
+            <a asp-page="/Account/Register"
+               class="text-primary-600 hover:text-primary-700 font-semibold transition">
+                Register as Customer
+            </a>
+        </p>
+
+        <p>
+            <a asp-page="/Account/Login"
+               class="text-primary-600 hover:text-primary-700 font-semibold transition">
+                Login
+            </a>
+        </p>
+    </div>
+
+    <!-- Organizer Approval Note -->
+    <div class="text-center mt-4 text-xs text-gray-500">
+        Organizer accounts require admin approval before activation.
+    </div>
+
 </div>
 
 @section Scripts {

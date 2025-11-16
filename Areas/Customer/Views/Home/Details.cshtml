@@ -3,62 +3,100 @@
     ViewData["Title"] = "Event Details";
 }
 
-<div class="max-w-4xl mx-auto mt-12 bg-white rounded-2xl shadow-lg ring-1 ring-gray-100 overflow-hidden">
+<div class="max-w-4xl mx-auto mt-12 bg-white rounded-3xl shadow-xl ring-1 ring-gray-200 overflow-hidden">
+
     <!-- Header Banner -->
-    <div class="bg-gradient-to-r from-blue-600 to-blue-500 text-white px-8 py-6">
-        <h1 class="text-3xl font-extrabold">@Model.Title</h1>
-        <p class="mt-1 text-sm text-blue-100">Explore event details and reserve your seat</p>
+    <div class="bg-gradient-to-r from-primary-600 to-primary-500 text-white px-8 py-6">
+        <h1 class="text-3xl font-extrabold tracking-tight">@Model.Title</h1>
+        <p class="mt-1 text-sm text-primary-100">Explore event details and reserve your seat</p>
     </div>
 
     <!-- Content -->
-    <div class="p-8 space-y-6 text-gray-800">
-        <p class="text-gray-700 leading-relaxed">@Model.Description</p>
+    <div class="p-8 space-y-8 text-gray-800">
 
-        <dl class="grid sm:grid-cols-2 gap-6 text-sm">
-            <div class="space-y-1">
-                <dt class="font-semibold text-gray-500 uppercase text-xs tracking-wider">Category</dt>
-                <dd class="text-gray-800">@Model.Category?.Name</dd>
-            </div>
+        <!-- Description -->
+        <p class="text-gray-700 leading-relaxed text-base">
+            @Model.Description
+        </p>
 
-            <div class="space-y-1">
-                <dt class="font-semibold text-gray-500 uppercase text-xs tracking-wider">Venue</dt>
-                <dd class="text-gray-800">@Model.Venue?.Name — @Model.Venue?.Location</dd>
-            </div>
+        <!-- Details Grid -->
+        <dl class="grid sm:grid-cols-2 gap-8 text-sm">
 
+            <!-- Category -->
             <div class="space-y-1">
-                <dt class="font-semibold text-gray-500 uppercase text-xs tracking-wider">Date</dt>
-                <dd class="text-gray-800">
-                    @Model.StartDate.ToString("MMM dd, yyyy hh:mm tt") — @Model.EndDate.ToString("MMM dd, yyyy hh:mm tt")
+                <dt class="font-semibold text-gray-500 uppercase text-xs tracking-wider">
+                    Category
+                </dt>
+                <dd class="text-gray-900 font-medium">
+                    @Model.Category?.Name
                 </dd>
             </div>
 
+            <!-- Venue -->
             <div class="space-y-1">
-                <dt class="font-semibold text-gray-500 uppercase text-xs tracking-wider">Ticket Price</dt>
-                <dd class="text-blue-600 font-semibold">$@Model.TicketPrice.ToString("0.00")</dd>
+                <dt class="font-semibold text-gray-500 uppercase text-xs tracking-wider">
+                    Venue
+                </dt>
+                <dd class="text-gray-900 font-medium">
+                    @Model.Venue?.Name — @Model.Venue?.Location
+                </dd>
             </div>
 
+            <!-- Date -->
             <div class="space-y-1">
-                <dt class="font-semibold text-gray-500 uppercase text-xs tracking-wider">Available Seats</dt>
-                <dd class="font-medium">
-                    <span class="text-green-600">@Model.AvailableSeats</span> /
+                <dt class="font-semibold text-gray-500 uppercase text-xs tracking-wider">
+                    Date
+                </dt>
+                <dd class="text-gray-900 font-medium">
+                    @Model.StartDate.ToString("MMM dd, yyyy hh:mm tt")
+                    →
+                    @Model.EndDate.ToString("MMM dd, yyyy hh:mm tt")
+                </dd>
+            </div>
+
+            <!-- Ticket Price -->
+            <div class="space-y-1">
+                <dt class="font-semibold text-gray-500 uppercase text-xs tracking-wider">
+                    Ticket Price
+                </dt>
+                <dd class="text-primary-600 text-lg font-bold">
+                    $@Model.TicketPrice.ToString("0.00")
+                </dd>
+            </div>
+
+            <!-- Seats -->
+            <div class="space-y-1">
+                <dt class="font-semibold text-gray-500 uppercase text-xs tracking-wider">
+                    Available Seats
+                </dt>
+                <dd class="font-semibold">
+                    <span class="text-green-600">@Model.AvailableSeats</span>
+                    /
                     <span class="text-gray-600">@Model.TotalSeats</span>
                 </dd>
             </div>
+
         </dl>
 
+        <!-- Buttons -->
         <div class="flex justify-between items-center pt-6 border-t border-gray-200">
+
+            <!-- Back -->
             <a asp-action="Index"
-               class="text-gray-600 hover:text-blue-600 text-sm font-medium flex items-center gap-1">
+               class="text-gray-600 hover:text-primary-600 text-sm font-medium flex items-center gap-1 transition">
                 ← Back to Events
             </a>
 
+            <!-- Book Now -->
             <a asp-area="Customer"
                asp-controller="Booking"
                asp-action="Create"
                asp-route-id="@Model.EventId"
-               class="bg-blue-600 hover:bg-blue-700 text-white font-medium px-5 py-2.5 rounded-lg shadow-sm transition">
+               class="bg-primary-600 hover:bg-primary-700 text-white font-semibold px-5 py-2.5
+                      rounded-xl shadow-md shadow-primary-600/30 transition active:scale-[0.97]">
                 Book Now
             </a>
         </div>
+
     </div>
 </div>

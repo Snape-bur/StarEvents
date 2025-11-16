@@ -1,53 +1,86 @@
 ﻿@model IEnumerable<StarEvents.Models.Booking>
+
 @{
     ViewData["Title"] = "Booking History";
 }
 
-<div class="max-w-6xl mx-auto px-4 mt-10">
-    <h1 class="text-3xl font-bold mb-6 text-gray-800">My Booking History</h1>
+<div class="max-w-7xl mx-auto px-4 mt-12">
 
-    @if (!Model.Any())
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-extrabold tracking-tight text-primary-600">
+            📜 Booking History
+        </h1>
+        <p class="text-gray-500 text-sm mt-1">Your past attended or completed events</p>
+    </div>
+
+    <!-- No History -->
+    @if (!Model.Any(b => b.Status == "Completed" || b.Status == "Attended"))
     {
-        <div class="text-center py-16 bg-white rounded-xl shadow-sm ring-1 ring-gray-100">
-            <p class="text-gray-500 text-lg">You have no completed bookings yet.</p>
+        <div class="text-center py-20 bg-white rounded-3xl shadow-xl ring-1 ring-gray-200">
+            <p class="text-gray-600 text-lg">You have no completed bookings yet.</p>
+            <p class="text-gray-400 text-sm mt-1">Attend events to see them appear here!</p>
         </div>
     }
     else
     {
-        <div class="grid gap-6 md:grid-cols-2">
+        <!-- Grid -->
+        <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+
             @foreach (var b in Model.Where(b => b.Status == "Completed" || b.Status == "Attended"))
             {
-                <div class="rounded-xl overflow-hidden bg-white shadow ring-1 ring-gray-200 hover:ring-blue-200 transition">
-                    <!-- Header -->
-                    <div class="p-4 border-b bg-blue-50">
-                        <h2 class="text-lg font-semibold text-blue-700">@b.Event?.Title</h2>
-                        <p class="text-sm text-gray-600">@b.Event?.Venue?.Name</p>
-                        <p class="text-xs text-gray-400">Booked on @b.BookingDate.ToString("dd MMM yyyy")</p>
+                <div class="rounded-3xl overflow-hidden bg-white shadow-lg ring-1 ring-gray-200 hover:shadow-2xl hover:ring-primary-300 transition">
+
+                    <!-- Card Header -->
+                    <div class="p-5 bg-gradient-to-r from-primary-50 to-primary-100 border-b border-gray-200">
+                        <h2 class="text-lg font-semibold text-primary-700">@b.Event?.Title</h2>
+                        <p class="text-gray-600 text-sm">@b.Event?.Venue?.Name</p>
+                        <p class="text-xs text-gray-500 mt-1">
+                            Booked on @b.BookingDate.ToString("dd MMM yyyy")
+                        </p>
                     </div>
 
-                    <!-- Content -->
-                    <div class="p-5 text-center flex flex-col items-center">
-                        <p class="text-gray-700 mb-2">
-                            <strong>Total Paid:</strong> $@b.TotalPrice.ToString("0.00")
-                        </p>
-                        <p class="text-sm text-gray-500 mb-4">
-                            <span class="font-medium text-green-600">@b.Status</span>
+                    <!-- Card Content -->
+                    <div class="p-6 flex flex-col items-center text-center">
+
+                        <!-- Total Paid -->
+                        <p class="text-gray-700 mb-1">
+                            <strong>Total Paid:</strong>
+                            <span class="text-primary-600 font-semibold">
+                                $@b.TotalPrice.ToString("0.00")
+                            </span>
                         </p>
 
+                        <!-- Status -->
+                        <p class="text-sm text-gray-500 mb-4">
+                            Status:
+                            <span class="font-semibold text-green-600">
+                                @b.Status
+                            </span>
+                        </p>
+
+                        <!-- QR Code -->
                         @if (!string.IsNullOrEmpty(b.QRCodePath))
                         {
                             <img src="@b.QRCodePath.Replace("wwwroot", "")"
                                  alt="QR Code"
-                                 class="w-32 h-32 mb-3 border rounded-lg shadow-sm ring-1 ring-gray-200" />
+                                 class="w-32 h-32 mb-4 rounded-xl border shadow-sm ring-1 ring-gray-200 bg-white" />
                         }
 
-                        <a asp-action="Ticket" asp-route-id="@b.BookingId"
-                           class="inline-block bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium px-5 py-2 rounded-md shadow">
-                            View Ticket
+                        <!-- Ticket Button -->
+                        <a asp-action="Ticket"
+                           asp-route-id="@b.BookingId"
+                           class="inline-block bg-primary-600 hover:bg-primary-700 text-white
+                                          text-sm font-semibold px-5 py-2.5 rounded-xl shadow-md
+                                          transition active:scale-[0.97]">
+                            🎫 View Ticket
                         </a>
+
                     </div>
+
                 </div>
             }
+
         </div>
     }
 </div>

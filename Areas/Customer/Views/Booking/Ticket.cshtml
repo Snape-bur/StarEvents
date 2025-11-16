@@ -1,26 +1,71 @@
 ﻿@model StarEvents.Models.Booking
+
 @{
     ViewData["Title"] = "Ticket Details";
 }
-<div class="max-w-md mx-auto mt-10 bg-white shadow-lg rounded-xl overflow-hidden">
-    <div class="p-6 text-center">
-        <h2 class="text-xl font-bold text-blue-600 mb-1">@Model.Event?.Title</h2>
-        <p class="text-sm text-gray-500 mb-2">@Model.Event?.Venue?.Name</p>
-        <p class="text-xs text-gray-400 mb-4">
+
+<div class="max-w-md mx-auto mt-14 bg-white rounded-3xl shadow-xl ring-1 ring-gray-200 overflow-hidden">
+
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-primary-600 to-primary-500 px-6 py-5 text-center text-white">
+        <h2 class="text-2xl font-extrabold tracking-tight">@Model.Event?.Title</h2>
+        <p class="text-sm text-primary-100">@Model.Event?.Venue?.Name</p>
+        <p class="text-xs text-primary-200 mt-1">
             @Model.Event?.StartDate.ToString("dd MMM yyyy hh:mm tt")
         </p>
+    </div>
 
-        <p class="text-gray-700 mb-3">
-            <strong>Booked On:</strong> @Model.BookingDate.ToString("dd MMM yyyy")<br />
-            <strong>Total:</strong> $@Model.TotalPrice.ToString("0.00")
-        </p>
+    <!-- Body -->
+    <div class="p-6 text-center text-gray-800">
 
+        <!-- Ticket Info -->
+        <div class="space-y-2 mb-6">
+            <p class="text-gray-700">
+                <span class="font-semibold text-gray-900">Booked On:</span>
+                @Model.BookingDate.ToString("dd MMM yyyy")
+            </p>
+
+            <p class="text-gray-700">
+                <span class="font-semibold text-gray-900">Total Paid:</span>
+                <span class="text-primary-600 font-semibold">
+                    $@Model.TotalPrice.ToString("0.00")
+                </span>
+            </p>
+
+            <p class="text-sm font-semibold
+                      @(Model.Status == "Paid" ? "text-green-600" : "text-red-600")">
+                Status: @Model.Status
+            </p>
+        </div>
+
+        <!-- QR Code -->
         @if (!string.IsNullOrEmpty(Model.QRCodePath))
         {
-            <img src="@Model.QRCodePath.Replace("wwwroot", "")" alt="QR Code"
-                 class="mx-auto w-40 h-40 border rounded-md shadow-md mb-3" />
+            <div class="flex justify-center">
+                <img src="@Model.QRCodePath.Replace("wwwroot", "")"
+                     alt="QR Code"
+                     class="w-44 h-44 rounded-xl bg-white shadow-md ring-1 ring-gray-200 mb-4" />
+            </div>
+        }
+        else
+        {
+            <p class="text-gray-400 italic mb-4">QR Code not available</p>
         }
 
-        <p class="text-sm text-green-600 font-semibold">Status: @Model.Status</p>
+        <!-- Divider -->
+        <hr class="my-4 border-gray-200" />
+
+        <!-- Footer Buttons -->
+        <div class="flex justify-center">
+            <a asp-area="Customer"
+               asp-controller="Booking"
+               asp-action="DownloadTicket"
+               asp-route-id="@Model.BookingId"
+               class="bg-primary-600 hover:bg-primary-700 text-white px-6 py-2.5 rounded-xl
+                      font-semibold shadow-md shadow-primary-600/20 transition active:scale-[0.97]">
+                📥 Download Ticket (PDF)
+            </a>
+        </div>
+
     </div>
 </div>
