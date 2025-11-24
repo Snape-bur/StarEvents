@@ -8,10 +8,8 @@ using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
 using StarEvents.Data;
 using StarEvents.Models;
+using StarEvents.Models.Enums;
 using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-
 
 namespace StarEvents.Areas.Customer.Controllers
 {
@@ -28,198 +26,236 @@ namespace StarEvents.Areas.Customer.Controllers
             _userManager = userManager;
         }
 
-        // ✅ Step 1: Show booking form
-        public async Task<IActionResult> Create(int id)
+        // ============================================================
+        // STEP 1: Checkout (Quantity + Promo + Redeem)
+        // ============================================================
+        public async Task<IActionResult> Checkout(int eventId)
         {
             var ev = await _context.Events
                 .Include(e => e.Venue)
-                .FirstOrDefaultAsync(e => e.EventId == id && e.Status == "Approved");
+                .FirstOrDefaultAsync(e => e.EventId == eventId && e.Status == "Approved");
 
-            if (ev == null) return NotFound();
+            if (ev == null)
+                return NotFound();
+
+            // Load points
+            var user = await _userManager.GetUserAsync(User);
+            var lp = await _context.LoyaltyPoints.FirstOrDefaultAsync(x => x.UserId == user.Id);
+            ViewBag.LoyaltyPoints = lp?.Points ?? 0;
 
             return View(ev);
         }
 
-        // ✅ Step 2: Handle booking form submission
-        [HttpPost, ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create(int eventId, int quantity)
+        // ============================================================
+        // STEP 2: Create Booking → Apply promo + redeem → Timer starts
+        // ============================================================
+        [HttpPost]
+        public async Task<IActionResult> CreateBooking(int eventId, int quantity, string promoCode, int redeemPercent)
         {
-            var ev = await _context.Events.FirstOrDefaultAsync(e => e.EventId == eventId && e.Status == "Approved");
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            var ev = await _context.Events.FirstOrDefaultAsync(e => e.EventId == eventId);
             if (ev == null) return NotFound();
 
             if (quantity < 1 || quantity > ev.AvailableSeats)
             {
-                ModelState.AddModelError("", "Invalid quantity selected.");
-                return View(ev);
+                TempData["Error"] = "Invalid quantity selected.";
+                return RedirectToAction("Checkout", new { eventId });
             }
 
-            var customer = await _userManager.GetUserAsync(User);
-            if (customer == null) return Unauthorized();
+            decimal baseTotal = ev.TicketPrice * quantity;
+            decimal finalTotal = baseTotal;
 
+            // ========= APPLY PROMO =========
+            decimal promoDiscount = 0;
+            if (!string.IsNullOrWhiteSpace(promoCode))
+            {
+                var promo = await _context.Discounts.FirstOrDefaultAsync(p =>
+                    p.Code == promoCode &&
+                    p.IsActive &&
+                    p.StartDate <= DateTime.UtcNow &&
+                    p.EndDate >= DateTime.UtcNow);
+
+                if (promo != null)
+                {
+                    promoDiscount = baseTotal * (promo.Percentage / 100m);
+                    finalTotal -= promoDiscount;
+                }
+            }
+
+            // ========= APPLY REDEEM POINTS =========
+            var lp = await _context.LoyaltyPoints.FirstOrDefaultAsync(x => x.UserId == user.Id);
+            int currentPoints = lp?.Points ?? 0;
+
+            if (redeemPercent > 50) redeemPercent = 50;
+            if (redeemPercent < 0) redeemPercent = 0;
+
+            int requiredPoints = redeemPercent * 10; // 10% = 100 pts
+
+            if (requiredPoints > currentPoints)
+            {
+                redeemPercent = 0;
+                requiredPoints = 0;
+            }
+
+            decimal redeemDiscount = 0;
+
+            if (redeemPercent > 0)
+            {
+                redeemDiscount = finalTotal * (redeemPercent / 100m);
+                finalTotal -= redeemDiscount;
+            }
+
+            // ========= CREATE BOOKING =========
             var booking = new Booking
             {
-                CustomerId = customer.Id,
+                CustomerId = user.Id,
                 EventId = ev.EventId,
                 Quantity = quantity,
-                TotalPrice = quantity * ev.TicketPrice,
+                TotalPrice = baseTotal,
+                FinalPrice = finalTotal,
+                PromoCode = promoCode,
+                DiscountAmount = promoDiscount + redeemDiscount,
+                PointsRedeemed = requiredPoints,
+                PointsDiscountAmount = redeemDiscount,
                 Status = "Pending",
-                BookingDate = DateTime.UtcNow
+                PaymentStatus = PaymentStatus.Pending,
+                BookingDate = DateTime.UtcNow,
+                ReservationExpiresAt = DateTime.UtcNow.AddMinutes(10)
             };
 
-            // Update available seats
-            ev.AvailableSeats -= quantity;
-
             _context.Bookings.Add(booking);
-            _context.Update(ev);
+
+            // reserve seats
+            ev.AvailableSeats -= quantity;
             await _context.SaveChangesAsync();
 
-            TempData["Ok"] = "✅ Booking successful!";
-            return RedirectToAction(nameof(MyBookings));
+            return RedirectToAction("Summary", new { id = booking.BookingId });
         }
 
-        // ✅ Step 3: Show customer’s bookings
+        // ============================================================
+        // STEP 3: Summary Page (Timer + Final Price)
+        // ============================================================
+        public async Task<IActionResult> Summary(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            var booking = await _context.Bookings
+                .Include(b => b.Event)
+                .ThenInclude(e => e.Venue)
+                .FirstOrDefaultAsync(b => b.BookingId == id && b.CustomerId == user.Id);
+
+            if (booking == null) return NotFound();
+
+            if (booking.ReservationExpiresAt < DateTime.UtcNow)
+            {
+                booking.Status = "Expired";
+                booking.PaymentStatus = PaymentStatus.Cancelled;
+                booking.Event.AvailableSeats += booking.Quantity;
+                await _context.SaveChangesAsync();
+
+                TempData["Error"] = "Your reservation expired.";
+                return RedirectToAction("MyBookings");
+            }
+
+            return View(booking);
+        }
+
+        // ============================================================
+        // CANCEL BOOKING
+        // ============================================================
+        [HttpPost]
+        public async Task<IActionResult> Cancel(int id)
+        {
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
+            var booking = await _context.Bookings
+                .Include(b => b.Event)
+                .FirstOrDefaultAsync(b => b.BookingId == id && b.CustomerId == user.Id);
+
+            if (booking == null) return NotFound();
+
+            if (booking.Status != "Pending")
+            {
+                TempData["Error"] = "You cannot cancel this booking.";
+                return RedirectToAction("MyBookings");
+            }
+
+            booking.Status = "Cancelled";
+            booking.PaymentStatus = PaymentStatus.Cancelled;
+            booking.Event.AvailableSeats += booking.Quantity;
+
+            await _context.SaveChangesAsync();
+            TempData["Ok"] = "Booking cancelled.";
+
+            return RedirectToAction("MyBookings");
+        }
+
+        // ============================================================
+        // MY BOOKINGS LIST
+        // ============================================================
         public async Task<IActionResult> MyBookings()
         {
-            var customer = await _userManager.GetUserAsync(User);
-            if (customer == null) return Unauthorized();
+            var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
 
             var list = await _context.Bookings
                 .Include(b => b.Event)
                 .ThenInclude(e => e.Venue)
-                .Where(b => b.CustomerId == customer.Id)
+                .Where(b => b.CustomerId == user.Id)
                 .OrderByDescending(b => b.BookingDate)
                 .ToListAsync();
 
             return View(list);
         }
 
-        // ✅ Show only upcoming (future) bookings
-        public async Task<IActionResult> Upcoming()
-        {
-            var user = await _userManager.GetUserAsync(User);
-            var upcoming = await _context.Bookings
-                .Include(b => b.Event)
-                .ThenInclude(e => e.Venue)
-                .Where(b => b.CustomerId == user.Id &&
-                            b.Event.StartDate >= DateTime.UtcNow &&
-                            b.Status == "Paid")
-                .OrderBy(b => b.Event.StartDate)
-                .ToListAsync();
-
-            return View("MyBookings", upcoming); // reuse same view
-        }
-
-        // ✅ Show only past / completed bookings
+        // ✅ History Page – Shows Paid/Completed Events
         public async Task<IActionResult> History()
         {
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
             var history = await _context.Bookings
                 .Include(b => b.Event)
-                .ThenInclude(e => e.Venue)
+                    .ThenInclude(e => e.Venue)
                 .Where(b => b.CustomerId == user.Id &&
-                            b.Event.StartDate < DateTime.UtcNow &&
                             b.Status == "Paid")
                 .OrderByDescending(b => b.Event.StartDate)
                 .ToListAsync();
 
-            return View("MyBookings", history);
+            return View(history);  
         }
 
 
-        // ✅ Simulate payment
-        /* [HttpPost]
-         [ValidateAntiForgeryToken]
-         public async Task<IActionResult> Pay(int id)
-         {
-             var user = await _userManager.GetUserAsync(User);
-             var booking = await _context.Bookings
-                 .Include(b => b.Event)
-                 .FirstOrDefaultAsync(b => b.BookingId == id && b.CustomerId == user.Id);
-
-             if (booking == null)
-                 return NotFound();
-
-             if (booking.Status != "Pending")
-             {
-                 TempData["Error"] = "This booking cannot be paid again.";
-                 return RedirectToAction(nameof(MyBookings));
-             }
-
-             // ✅ Step 1: Mark as paid
-             booking.Status = "Paid";
-
-             // ✅ Step 2: Generate QR code (mock mode)
-             string qrText = $"Booking:{booking.BookingId}|Event:{booking.Event.Title}|Customer:{user.Email}|Date:{DateTime.UtcNow:yyyy-MM-dd}";
-             using var qrGen = new QRCodeGenerator();
-             var qrData = qrGen.CreateQrCode(qrText, QRCodeGenerator.ECCLevel.Q);
-             using var qrCode = new QRCode(qrData);
-             using var bitmap = qrCode.GetGraphic(20);
-
-             // ✅ Step 3: Save to /wwwroot/qrcodes
-             var folder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot/qrcodes");
-             if (!Directory.Exists(folder))
-                 Directory.CreateDirectory(folder);
-
-             var filePath = Path.Combine(folder, $"Booking_{booking.BookingId}.png");
-             bitmap.Save(filePath, System.Drawing.Imaging.ImageFormat.Png);
-
-
-             // ✅ Step 4: Store path in database
-             booking.QRCodePath = $"/qrcodes/Booking_{booking.BookingId}.png";
-
-             await _context.SaveChangesAsync();
-
-             TempData["Ok"] = $"Payment successful for {booking.Event.Title}. QR code generated!";
-             return RedirectToAction(nameof(MyBookings));
-         }
-
-
-         // ✅ Show all paid bookings
-         public async Task<IActionResult> History()
-         {
-             var user = await _userManager.GetUserAsync(User);
-             var bookings = await _context.Bookings
-                 .Include(b => b.Event)
-                 .ThenInclude(e => e.Venue)
-                 .Where(b => b.CustomerId == user.Id && b.Status == "Paid")
-                 .OrderByDescending(b => b.BookingDate)
-                 .ToListAsync();
-
-             return View(bookings);
-         }
-
-         public async Task<IActionResult> Ticket(int id)
-         {
-             var user = await _userManager.GetUserAsync(User);
-             var booking = await _context.Bookings
-                 .Include(b => b.Event)
-                 .ThenInclude(e => e.Venue)
-                 .FirstOrDefaultAsync(b => b.BookingId == id && b.CustomerId == user.Id);
-
-             if (booking == null)
-                 return NotFound();
-
-             return View(booking);
-         }
-        */
+        // ============================================================
+        // DOWNLOAD TICKET (PDF)
+        // ============================================================
         [HttpGet]
         public async Task<IActionResult> DownloadTicket(int id)
         {
-            QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+            QuestPDF.Settings.License = LicenseType.Community;
 
             var user = await _userManager.GetUserAsync(User);
+            if (user == null) return Unauthorized();
+
             var booking = await _context.Bookings
                 .Include(b => b.Event)
-                .ThenInclude(e => e.Venue)
+                    .ThenInclude(e => e.Venue)
                 .FirstOrDefaultAsync(b => b.BookingId == id && b.CustomerId == user.Id);
 
-            if (booking == null)
-                return NotFound();
+            if (booking == null) return NotFound();
 
+            // QR path (fallback if missing)
             var qrPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "qrcodes", $"Booking_{booking.BookingId}.png");
             if (!System.IO.File.Exists(qrPath))
+            {
                 qrPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "images", "placeholder-qr.png");
+            }
 
+            // Generate PDF
             var pdf = Document.Create(container =>
             {
                 container.Page(page =>
@@ -228,64 +264,43 @@ namespace StarEvents.Areas.Customer.Controllers
                     page.Size(PageSizes.A5);
                     page.DefaultTextStyle(x => x.FontSize(12).FontColor(Colors.Black));
 
-                    // ===== HEADER =====
-                    page.Header().Background(Colors.DeepPurple.Medium).Padding(10).Row(row =>
-                    {
-                        row.RelativeColumn().AlignLeft().Text("StarEvent")
-                            .SemiBold().FontColor(Colors.White).FontSize(18);
-                        row.ConstantColumn(60).Height(10);
-                    });
+                    page.Header()
+                        .Background(Colors.DeepPurple.Medium)
+                        .Padding(10)
+                        .Text("StarEvents Ticket")
+                        .FontSize(20)
+                        .FontColor(Colors.White)
+                        .SemiBold();
 
-                    // ===== CONTENT =====
-                    page.Content().PaddingVertical(15).Column(col =>
+                    page.Content().PaddingVertical(20).Column(col =>
                     {
                         col.Spacing(10);
 
-                        col.Item().Text(booking.Event?.Title ?? "Event Title")
-                            .Bold().FontSize(16).FontColor(Colors.DeepPurple.Darken2);
+                        col.Item().Text(booking.Event.Title).Bold().FontSize(18);
+                        col.Item().Text($"Venue: {booking.Event.Venue?.Name}");
+                        col.Item().Text($"Date: {booking.Event.StartDate:dd MMM yyyy hh:mm tt}");
+                        col.Item().Text($"Name: {user.FullName ?? user.Email}");
+                        col.Item().Text($"Paid: ฿{booking.FinalPrice:0.00}");
 
-                        col.Item().Text($"📍 {booking.Event?.Venue?.Name ?? "Venue"}");
-                        col.Item().Text($"📅 {booking.Event?.StartDate:dd MMM yyyy hh:mm tt}");
-                        col.Item().Text($"👤 {user.FullName ?? user.Email}");
-                        col.Item().Text($"💰 Total Paid: ${booking.TotalPrice:0.00}");
+                        if (!string.IsNullOrWhiteSpace(booking.PromoCode))
+                            col.Item().Text($"Promo Used: {booking.PromoCode}");
 
-                        col.Item().PaddingVertical(10).LineHorizontal(1).LineColor(Colors.Grey.Lighten1);
-
-                        col.Item().Row(row =>
+                        col.Item().PaddingVertical(15).Row(row =>
                         {
-                            row.Spacing(20);
-                            row.ConstantItem(120).Height(120).Image(qrPath).FitArea();
-
-                            row.RelativeItem().Column(inner =>
-                            {
-                                inner.Spacing(5);
-                                inner.Item().Text("Show this ticket at the event gate.")
-                                    .Italic().FontColor(Colors.Grey.Medium);
-                                inner.Item().Text($"Booking ID: #{booking.BookingId}").FontSize(11);
-                                inner.Item().Text($"Issued: {DateTime.UtcNow:dd MMM yyyy}").FontSize(11);
-                            });
+                            row.ConstantItem(120).Height(120).Image(qrPath);
+                            row.RelativeItem().Text($"Booking ID: {booking.BookingId}");
                         });
                     });
 
-                    page.Footer().AlignCenter().Text(txt =>
-                    {
-                        txt.Span("© ").FontSize(10);
-                        txt.Span($"{DateTime.UtcNow.Year} StarEvents - All Rights Reserved").FontSize(10).Bold();
-                    });
+                    page.Footer().AlignCenter().Text($"© {DateTime.UtcNow.Year} StarEvents — All rights reserved");
                 });
             });
 
-            // ✅ FIX: Don’t use `using var` here.
             var stream = new MemoryStream();
             pdf.GeneratePdf(stream);
-
-            // ✅ Reset position before returning
             stream.Position = 0;
 
-            // ✅ Return FileResult (ASP.NET will handle stream disposal)
             return File(stream, "application/pdf", $"Ticket_{booking.BookingId}.pdf");
         }
-
-
     }
 }

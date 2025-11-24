@@ -2,12 +2,40 @@
 
 @{
     ViewData["Title"] = "Event Details";
+
+    // Load active discount (global admin discount)
+    var discount = Model.Discounts?
+        .FirstOrDefault(d =>
+            d.IsActive &&
+            d.StartDate <= DateTime.UtcNow &&
+            d.EndDate >= DateTime.UtcNow
+        );
+
+    decimal originalPrice = Model.TicketPrice;
+    decimal finalPrice = originalPrice;
+    decimal savedAmount = 0;
+
+    if (discount != null)
+    {
+        finalPrice = originalPrice - (originalPrice * discount.Percentage / 100);
+        savedAmount = originalPrice - finalPrice;
+    }
 }
 
 <div class="max-w-4xl mx-auto mt-12 bg-white rounded-3xl shadow-xl ring-1 ring-gray-200 overflow-hidden">
 
     <!-- Header Banner -->
-    <div class="bg-gradient-to-r from-primary-600 to-primary-500 text-white px-8 py-6">
+    <div class="relative bg-gradient-to-r from-primary-600 to-primary-500 text-white px-8 py-6">
+
+        <!-- 🔥 Discount Badge -->
+        @if (discount != null)
+        {
+            <span class="absolute top-4 right-4 bg-red-600 text-white text-xs font-bold
+                             px-3 py-1 rounded-full shadow">
+                @discount.Percentage% OFF
+            </span>
+        }
+
         <h1 class="text-3xl font-extrabold tracking-tight">@Model.Title</h1>
         <p class="mt-1 text-sm text-primary-100">Explore event details and reserve your seat</p>
     </div>
@@ -42,11 +70,32 @@
                 </dd>
             </div>
 
+            <!-- Pricing Section -->
             <div class="space-y-1">
                 <dt class="text-xs uppercase font-semibold text-gray-500 tracking-wider">Ticket Price</dt>
-                <dd class="text-primary-600 font-semibold text-lg">
-                    $@Model.TicketPrice.ToString("0.00")
-                </dd>
+
+                @if (discount == null)
+                {
+                    <!-- Normal Price -->
+                    <dd class="text-primary-600 font-semibold text-lg">
+                        $@originalPrice.ToString("0.00")
+                    </dd>
+                }
+                else
+                {
+                    <!-- Discounted Price -->
+                    <dd class="text-lg font-extrabold text-red-600">
+                        $@finalPrice.ToString("0.00")
+                    </dd>
+
+                    <dd class="line-through text-gray-500 text-sm">
+                        $@originalPrice.ToString("0.00")
+                    </dd>
+
+                    <dd class="text-green-600 text-sm font-medium">
+                        You save $@savedAmount.ToString("0.00")
+                    </dd>
+                }
             </div>
 
             <div class="space-y-1">
@@ -66,14 +115,22 @@
                 ← Back to Events
             </a>
 
-            <a asp-area="Customer"
-               asp-controller="Booking"
-               asp-action="Create"
-               asp-route-id="@Model.EventId"
-               class="bg-primary-600 hover:bg-primary-700 text-white font-semibold px-6 py-2.5
-                      rounded-xl shadow-md shadow-primary-600/30 transition active:scale-[0.97]">
-                Book Now
-            </a>
+            <form asp-area="Customer"
+                  asp-controller="Booking"
+                  asp-action="CheckoutPage"
+                  method="get"
+                  class="flex items-center gap-2">
+
+                <input type="hidden" name="eventId" value="@Model.EventId" />
+
+                <button type="submit"
+                        class="bg-primary-600 hover:bg-primary-700 text-white font-semibold px-6 py-2.5
+                   rounded-xl shadow-md shadow-primary-600/30 transition active:scale-[0.97]">
+                    Book Now
+                </button>
+            </form>
+
+
 
         </div>
 

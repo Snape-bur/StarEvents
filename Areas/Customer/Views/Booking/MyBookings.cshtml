@@ -4,177 +4,165 @@
     ViewData["Title"] = "My Bookings";
 }
 
-<!-- Alpine.js for modal behavior -->
-<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+<link rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
 
-<div class="max-w-7xl mx-auto mt-12 px-4"
-     x-data="{ openModal: false, selectedId: null, selectedEvent: '', selectedTotal: '' }">
+<div class="max-w-6xl mx-auto mt-10 px-4 space-y-8">
 
-    <!-- Header -->
-    <div class="mb-8">
-        <h2 class="text-3xl font-extrabold tracking-tight text-primary-600">
-            🎫 My Bookings
-        </h2>
-        <p class="text-gray-500 mt-1">Manage your tickets and payments easily.</p>
-    </div>
+    <h2 class="text-3xl font-extrabold text-primary-600">
+        My Bookings
+    </h2>
 
-    <!-- Alerts -->
-    @if (TempData["Ok"] != null)
-    {
-        <div class="mb-4 rounded-xl bg-green-50 border border-green-200 text-green-700 px-4 py-3 text-sm shadow-sm">
-            @TempData["Ok"]
-        </div>
-    }
-    @if (TempData["Error"] != null)
-    {
-        <div class="mb-4 rounded-xl bg-red-50 border border-red-200 text-red-700 px-4 py-3 text-sm shadow-sm">
-            @TempData["Error"]
-        </div>
-    }
-
-    <!-- No Bookings -->
     @if (!Model.Any())
     {
-        <div class="text-center py-20">
-            <p class="text-lg text-gray-600">You have no bookings yet.</p>
-            <p class="text-sm text-gray-400 mt-1">Explore events and start booking today.</p>
+        <div class="text-center py-20 text-gray-500">
+            <p class="text-lg">You have no bookings yet.</p>
+            <p class="text-sm mt-1">Browse events and get your first ticket.</p>
         </div>
     }
     else
     {
-        <!-- Premium Table Wrapper -->
-        <div class="overflow-x-auto bg-white rounded-3xl shadow-xl ring-1 ring-gray-200">
-            <table class="min-w-full text-sm text-gray-700">
-                <thead class="bg-primary-50 text-primary-700 text-xs uppercase font-semibold">
-                    <tr>
-                        <th class="px-6 py-4">Event</th>
-                        <th class="px-6 py-4">Venue</th>
-                        <th class="px-6 py-4 text-center">Tickets</th>
-                        <th class="px-6 py-4 text-center">Total</th>
-                        <th class="px-6 py-4 text-center">Status</th>
-                        <th class="px-6 py-4 text-center">QR Code</th>
-                        <th class="px-6 py-4 text-center">Actions</th>
-                    </tr>
-                </thead>
+        <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
 
-                <tbody class="divide-y divide-gray-200">
-                    @foreach (var b in Model)
-                    {
-                        <tr class="hover:bg-primary-50/40 transition">
-                            <td class="px-6 py-4 font-medium text-gray-900">@b.Event?.Title</td>
-                            <td class="px-6 py-4 text-gray-700">@b.Event?.Venue?.Name</td>
-                            <td class="px-6 py-4 text-center">@b.Quantity</td>
-                            <td class="px-6 py-4 text-center font-semibold text-primary-600">
-                                $@b.TotalPrice.ToString("0.00")
-                            </td>
+            @foreach (var b in Model)
+            {
+                <div class="rounded-2xl bg-white shadow-xl ring-1 ring-gray-200 p-6 flex flex-col justify-between">
 
-                            <!-- Status -->
-                            <td class="px-6 py-4 text-center">
-                                @if (b.Status == "Paid")
-                                {
-                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">Paid</span>
-                                }
-                                else if (b.Status == "Cancelled")
-                                {
-                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">Cancelled</span>
-                                }
-                                else
-                                {
-                                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">Pending</span>
-                                }
-                            </td>
+                    <!-- Event Title -->
+                    <div>
+                        <h3 class="text-lg font-bold text-gray-900 line-clamp-2">
+                            @b.Event?.Title
+                        </h3>
 
-                            <!-- QR Code -->
-                            <td class="px-6 py-4 text-center">
-                                @if (b.Status == "Paid" && !string.IsNullOrEmpty(b.QRCodePath))
-                                {
-                                    <img src="@b.QRCodePath"
-                                         class="w-16 h-16 mx-auto rounded-md border shadow-sm" />
-                                }
-                                else
-                                {
-                                    <span class="text-gray-400 text-xs italic">No QR</span>
-                                }
-                            </td>
+                        <p class="mt-1 text-sm text-gray-500 flex items-center gap-1">
+                            <i class="bi bi-geo-alt text-primary-600"></i>
+                            @b.Event?.Venue?.Name
+                        </p>
 
-                            <!-- Actions -->
-                            <td class="px-6 py-4 text-center text-sm space-y-1">
+                        <p class="text-sm text-gray-500 flex items-center gap-1">
+                            <i class="bi bi-calendar-event text-primary-600"></i>
+                            @b.Event?.StartDate.ToString("dd MMM yyyy — hh:mm tt")
+                        </p>
+                    </div>
 
-                                <!-- Pending Payments -->
-                                @if (b.Status == "Pending")
-                                {
-                                    <button x-on:click="
-                                                        openModal = true;
-                                                        selectedId = @b.BookingId;
-                                                        selectedEvent = '@b.Event?.Title';
-                                                        selectedTotal = '@b.TotalPrice.ToString("0.00")';
-                                                    "
-                                            class="inline-block bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-lg shadow-md transition">
-                                        💳 Pay Now
-                                    </button>
-                                }
-                                else if (b.Status == "Paid")
-                                {
-                                    <a href="@b.QRCodePath" download
-                                       class="block text-primary-600 hover:text-primary-700 font-medium transition">
-                                        📥 Download QR
-                                    </a>
+                    <!-- Divider -->
+                    <div class="my-4 border-t border-gray-200"></div>
 
-                                    <a asp-area="Customer"
-                                       asp-controller="Booking"
-                                       asp-action="DownloadTicket"
-                                       asp-route-id="@b.BookingId"
-                                       class="block text-green-600 hover:text-green-700 font-medium transition">
-                                        🎫 Ticket PDF
-                                    </a>
-                                }
-                                else if (b.Status == "Cancelled")
-                                {
-                                    <span class="text-red-500 italic">Cancelled</span>
-                                }
-                            </td>
-                        </tr>
-                    }
-                </tbody>
+                    <!-- Ticket Info -->
+                    <div class="space-y-1">
+                        <p class="text-sm">
+                            <span class="font-semibold text-gray-700">Qty:</span>
+                            @b.Quantity
+                        </p>
+                        <p class="text-sm">
+                            <span class="font-semibold text-gray-700">Total:</span>
+                            ฿@b.FinalPrice.ToString("0.00")
+                        </p>
+                    </div>
 
-            </table>
+                    <!-- Divider -->
+                    <div class="my-4 border-t border-gray-200"></div>
+
+                    <!-- Status -->
+                    <div class="flex items-center justify-between">
+
+                        @if (b.Status == "Paid")
+                        {
+                            <span class="px-3 py-1 text-xs bg-green-100 text-green-700 rounded-full">
+                                Paid
+                            </span>
+                        }
+                        else if (b.Status == "Pending")
+                        {
+                            <div>
+                                <span class="px-3 py-1 text-xs bg-yellow-100 text-yellow-700 rounded-full">
+                                    Pending
+                                </span>
+
+                                @if (b.ReservationExpiresAt != null)
+                                {
+                                    <div class="text-xs text-red-600 mt-1"
+                                         id="timer-@b.BookingId">
+                                        --:--
+                                    </div>
+
+                                    <script>
+                                        (function () {
+                                            const expiresAt = new Date("@b.ReservationExpiresAt.Value.ToString("yyyy-MM-ddTHH:mm:ss")Z");
+                                            const el = document.getElementById("timer-@b.BookingId");
+
+                                            function tick() {
+                                                const diff = expiresAt - new Date();
+                                                if (diff <= 0) {
+                                                    el.innerText = "Expired";
+                                                    return;
+                                                }
+                                                const m = Math.floor(diff / 60000);
+                                                const s = Math.floor((diff / 1000) % 60);
+                                                el.innerText = m.toString().padStart(2, "0") + ":" + s.toString().padStart(2, "0");
+                                            }
+                                            tick();
+                                            setInterval(tick, 1000);
+                                        })();
+                                    </script>
+                                }
+                            </div>
+                        }
+                        else
+                        {
+                            <span class="px-3 py-1 text-xs bg-red-100 text-red-700 rounded-full">
+                                Expired
+                            </span>
+                        }
+                    </div>
+
+                    <!-- Divider -->
+                    <div class="my-4 border-t border-gray-200"></div>
+
+                    <!-- Buttons -->
+                    <div class="space-y-2">
+
+                        @if (b.Status == "Pending")
+                        {
+                            <a asp-area="Customer"
+                               asp-controller="Payment"
+                               asp-action="Confirm"
+                               asp-route-id="@b.BookingId"
+                               class="w-full flex items-center justify-center gap-2 bg-primary-600 text-white py-2 rounded-xl hover:bg-primary-700">
+                                <i class="bi bi-credit-card"></i> Pay Now
+                            </a>
+
+                            <form asp-area="Customer"
+                                  asp-controller="Booking"
+                                  asp-action="Cancel"
+                                  method="post">
+                                <input type="hidden" name="id" value="@b.BookingId" />
+                                <button class="w-full flex items-center justify-center gap-2 bg-red-500 text-white py-2 rounded-xl hover:bg-red-600">
+                                    <i class="bi bi-x-circle"></i> Cancel
+                                </button>
+                            </form>
+                        }
+                        else if (b.Status == "Paid")
+                        {
+                            <a asp-area="Customer"
+                               asp-controller="Booking"
+                               asp-action="DownloadTicket"
+                               asp-route-id="@b.BookingId"
+                               class="w-full flex items-center justify-center gap-2 bg-primary-600 text-white py-2 rounded-xl hover:bg-green-700">
+                                <i class="bi bi-ticket-detailed"></i> Download Ticket
+                            </a>
+                        }
+                        else
+                        {
+                            <button disabled
+                                    class="w-full bg-gray-200 text-gray-500 py-2 rounded-xl cursor-not-allowed">
+                                No Actions
+                            </button>
+                        }
+                    </div>
+
+                </div>
+            }
         </div>
     }
-
-    <!-- Confirm Payment Modal -->
-    <div x-show="openModal"
-         x-transition.opacity
-         class="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-
-        <div class="bg-white rounded-2xl shadow-xl p-8 w-full max-w-sm">
-            <h3 class="text-lg font-extrabold text-gray-800 mb-4">Confirm Payment</h3>
-
-            <div class="bg-gray-50 rounded-xl border px-4 py-3 text-sm text-gray-700 mb-6 shadow-inner">
-                <p><strong>Event:</strong> <span x-text="selectedEvent"></span></p>
-                <p><strong>Total:</strong> $<span x-text="selectedTotal"></span></p>
-            </div>
-
-            <div class="flex justify-end space-x-3">
-                <button x-on:click="openModal = false"
-                        class="px-4 py-2 rounded-lg bg-gray-200 hover:bg-gray-300 text-gray-700 transition">
-                    Cancel
-                </button>
-                <form method="post"
-                      asp-area="Customer"
-                      asp-controller="Payment"
-                      asp-action="Confirm">
-
-                    <input type="hidden" name="id" x-model="selectedId" />
-
-                    <button type="submit"
-                            class="px-4 py-2 rounded-lg bg-primary-600 hover:bg-primary-700 text-white shadow-md transition">
-                        Confirm & Pay
-                    </button>
-                </form>
-
-            </div>
-        </div>
-
-    </div>
-
 </div>

@@ -90,11 +90,29 @@
 
             @foreach (var e in Model.Results)
             {
-                <div class="bg-white rounded-3xl shadow-xl ring-1 ring-gray-200 p-6
+                <div class="relative bg-white rounded-3xl shadow-xl ring-1 ring-gray-200 p-6
                                     hover:shadow-2xl transition transform hover:-translate-y-1">
 
+                    <!-- 🔥 Discount Badge -->
+                    @{
+                        var discount = Model.Discounts?
+                        .FirstOrDefault(d =>
+                        d.IsActive &&
+                        d.StartDate <= DateTime.UtcNow &&
+                        d.EndDate >= DateTime.UtcNow
+                        );
+                    }
+
+                    @if (discount != null)
+                    {
+                        <span class="absolute top-4 left-4 bg-red-600 text-white text-xs font-bold
+                                                 px-3 py-1 rounded-full shadow">
+                            @discount.Percentage% OFF
+                        </span>
+                    }
+
                     <!-- Title + Category -->
-                    <div class="mb-4">
+                    <div class="mb-4">a
                         <h3 class="text-xl font-semibold text-gray-900">@e.Title</h3>
                         <p class="text-sm text-gray-500">@e.Category?.Name</p>
                     </div>
@@ -125,12 +143,12 @@
 
                         <a asp-area="Customer"
                            asp-controller="Booking"
-                           asp-action="Create"
-                           asp-route-id="@e.EventId"
-                           class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2
-                                          rounded-xl shadow-md shadow-primary-600/20 transition active:scale-[0.97]">
+                           asp-action="Checkout"
+                           asp-route-eventId="@e.EventId"
+                           class="bg-primary-600 hover:bg-primary-700 text-white px-4 py-2 rounded-xl shadow-md shadow-primary-600/20 transition active:scale-[0.97]">
                             Book Now
                         </a>
+
                     </div>
 
                 </div>

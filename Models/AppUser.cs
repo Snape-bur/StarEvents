@@ -16,6 +16,8 @@ namespace StarEvents.Models
         // ✅ Customer convenience flag
         public bool IsCustomer { get; set; } = true;    // Default true for new users
 
+
+
         // ✅ Timestamps
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     }

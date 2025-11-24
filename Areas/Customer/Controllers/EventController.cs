@@ -9,7 +9,7 @@ using StarEvents.Models.ViewModels;
 namespace StarEvents.Areas.Customer.Controllers
 {
     [Area("Customer")]
-    [AllowAnonymous] // 👈 Allow browsing events without login
+    [AllowAnonymous]
     public class EventController : Controller
     {
         private readonly ApplicationDbContext _context;
@@ -39,11 +39,14 @@ namespace StarEvents.Areas.Customer.Controllers
                     Text = v.Name
                 }).ToListAsync();
 
-            // Base query (Approved only)
+            // Base query (Approved + Not Expired)
             var q = _context.Events
                 .Include(e => e.Category)
                 .Include(e => e.Venue)
-                .Where(e => e.Status == "Approved")
+                .Where(e =>
+                    e.Status == "Approved" &&
+                    e.EndDate >= DateTime.UtcNow          // ⭐ HIDE EXPIRED EVENTS
+                )
                 .AsQueryable();
 
             // Apply filters
@@ -73,10 +76,16 @@ namespace StarEvents.Areas.Customer.Controllers
             // Load results
             vm.Results = await q.OrderBy(e => e.StartDate).ToListAsync();
 
+            vm.Discounts = await _context.Discounts
+                .Where(d => d.IsActive &&
+                            d.StartDate <= DateTime.UtcNow &&
+                            d.EndDate >= DateTime.UtcNow)
+                .ToListAsync();
+
             return View(vm);
         }
 
-        // ✅ View event details
+        // ✅ Event details page
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -84,7 +93,11 @@ namespace StarEvents.Areas.Customer.Controllers
             var ev = await _context.Events
                 .Include(e => e.Category)
                 .Include(e => e.Venue)
-                .FirstOrDefaultAsync(e => e.EventId == id && e.Status == "Approved");
+                .FirstOrDefaultAsync(e =>
+                    e.EventId == id &&
+                    e.Status == "Approved" &&
+                    e.EndDate >= DateTime.UtcNow     // ⭐ Prevent viewing expired event
+                );
 
             if (ev == null) return NotFound();
 

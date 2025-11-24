@@ -16,5 +16,8 @@ namespace StarEvents.Models.ViewModels
         public List<SelectListItem> Categories { get; set; } = new();
         public List<SelectListItem> Venues { get; set; } = new();
         public List<Event> Results { get; set; } = new();
+
+        public List<Discount>? Discounts { get; set; }
+
     }
 }

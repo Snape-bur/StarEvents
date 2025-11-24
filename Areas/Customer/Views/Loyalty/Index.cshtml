@@ -1,0 +1,85 @@
+﻿@model StarEvents.Models.ViewModels.LoyaltyHistoryVM
+
+@{
+    ViewData["Title"] = "Loyalty History";
+}
+
+<div class="max-w-5xl mx-auto mt-12 px-4">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h2 class="text-3xl font-extrabold tracking-tight text-primary-600">
+                ⭐ Loyalty History
+            </h2>
+            <p class="text-gray-500 text-sm mt-1">
+                See how you earned and used your points.
+            </p>
+        </div>
+
+        <div class="rounded-2xl bg-primary-50 border border-primary-200 px-4 py-3 text-right">
+            <p class="text-xs text-primary-600 font-semibold">Current Balance</p>
+            <p class="text-2xl font-extrabold text-primary-700">
+                @Model.CurrentPoints pts
+            </p>
+        </div>
+    </div>
+
+    @if (Model.Transactions == null || !Model.Transactions.Any())
+    {
+        <div class="mt-10 rounded-2xl bg-white border border-gray-200 p-6 text-center text-gray-500">
+            No loyalty activity yet. Book events and start earning points!
+        </div>
+    }
+    else
+    {
+        <div class="overflow-x-auto rounded-3xl bg-white shadow-xl ring-1 ring-gray-200">
+            <table class="min-w-full text-sm text-gray-700">
+                <thead class="bg-gray-50 text-xs uppercase font-semibold text-gray-500">
+                    <tr>
+                        <th class="px-6 py-3 text-left">Date</th>
+                        <th class="px-6 py-3 text-left">Type</th>
+                        <th class="px-6 py-3 text-left">Booking / Event</th>
+                        <th class="px-6 py-3 text-right">Points</th>
+                        <th class="px-6 py-3 text-left">Note</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-200">
+                    @foreach (var t in Model.Transactions)
+                    {
+                        var isEarn = t.PointsChange > 0;
+                        <tr class="hover:bg-gray-50 transition">
+                            <td class="px-6 py-3">
+                                @t.CreatedAt.ToLocalTime().ToString("dd MMM yyyy HH:mm")
+                            </td>
+                            <td class="px-6 py-3">
+                                @t.Type.ToString()
+                            </td>
+                            <td class="px-6 py-3">
+                                @if (t.Booking != null && t.Booking.Event != null)
+                                {
+                                    <span class="font-medium">@t.Booking.Event.Title</span>
+                                    <span class="text-xs text-gray-400">
+                                        (#@t.BookingId)
+                                    </span>
+                                }
+                                else
+                                {
+                                    <span class="text-gray-400 text-xs">N/A</span>
+                                }
+                            </td>
+                            <td class="px-6 py-3 text-right font-semibold">
+                                <span class="@(isEarn ? "text-green-600" : "text-red-600")">
+                                    @(t.PointsChange > 0 ? "+" : "")@t.PointsChange
+                                </span>
+                            </td>
+                            <td class="px-6 py-3 text-gray-600">
+                                @t.Description
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    }
+</div>

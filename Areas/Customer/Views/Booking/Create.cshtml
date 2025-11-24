@@ -2,6 +2,24 @@
 
 @{
     ViewData["Title"] = "Book Event";
+
+    // Load active discount (global admin discount)
+    var discount = Model.Discounts?
+        .FirstOrDefault(d =>
+            d.IsActive &&
+            d.StartDate <= DateTime.UtcNow &&
+            d.EndDate >= DateTime.UtcNow
+        );
+
+    decimal originalPrice = Model.TicketPrice;
+    decimal finalPrice = originalPrice;
+    decimal savedAmount = 0;
+
+    if (discount != null)
+    {
+        finalPrice = originalPrice - (originalPrice * discount.Percentage / 100);
+        savedAmount = originalPrice - finalPrice;
+    }
 }
 
 <div class="max-w-5xl mx-auto mt-12 bg-white rounded-3xl shadow-xl ring-1 ring-gray-200 p-10">
@@ -27,12 +45,33 @@
                     <span class="font-semibold">📅 Date:</span>
                     @Model.StartDate.ToString("MMM dd, yyyy") → @Model.EndDate.ToString("MMM dd, yyyy")
                 </p>
+
+                <!-- Price with Discount -->
                 <p>
                     <span class="font-semibold">💲 Price per Ticket:</span>
-                    <span class="text-primary-600 font-semibold">
-                        $@Model.TicketPrice.ToString("0.00")
-                    </span>
+
+                    @if (discount == null)
+                    {
+                        <span class="text-primary-600 font-semibold">
+                            $@originalPrice.ToString("0.00")
+                        </span>
+                    }
+                    else
+                    {
+                        <div class="flex items-center gap-2">
+                            <span class="text-red-600 font-bold text-lg">
+                                $@finalPrice.ToString("0.00")
+                            </span>
+                            <span class="line-through text-gray-500 text-sm">
+                                $@originalPrice.ToString("0.00")
+                            </span>
+                            <span class="text-green-600 text-xs font-medium">
+                                (@discount.Percentage% OFF)
+                            </span>
+                        </div>
+                    }
                 </p>
+
                 <p>
                     <span class="font-semibold">🎟 Available Seats:</span>
                     @Model.AvailableSeats
@@ -58,7 +97,68 @@
                            required />
                 </div>
 
-                <!-- Button Row -->
+                <!-- Promo Code Input -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-800 mb-1">Promo Code (optional)</label>
+                    <input type="text"
+                           name="promoCode"
+                           placeholder="Enter promo code"
+                           class="w-full rounded-xl border border-gray-300 px-4 py-3 text-gray-900
+                                  focus:ring-2 focus:ring-primary-300 focus:border-primary-500 transition" />
+                </div>
+
+                <!-- Price Summary -->
+                <div class="bg-white p-4 rounded-xl border text-sm space-y-1">
+                    <p class="flex justify-between">
+                        <span class="text-gray-700">Price per ticket:</span>
+
+                        @if (discount == null)
+                        {
+                            <span class="font-semibold text-gray-900" id="pricePer">
+                                $@originalPrice.ToString("0.00")
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="font-semibold text-red-600" id="pricePer">
+                                $@finalPrice.ToString("0.00")
+                            </span>
+                        }
+                    </p>
+
+                    @if (discount != null)
+                    {
+                        <p class="flex justify-between text-xs">
+                            <span class="text-green-600">Discount applied:</span>
+                            <span class="font-semibold text-green-600">@discount.Percentage% OFF</span>
+                        </p>
+                    }
+
+                    <p class="flex justify-between">
+                        <span class="text-gray-700">Selected quantity:</span>
+                        <span class="font-semibold text-gray-900" id="qtySummary">0</span>
+                    </p>
+
+                    <p class="flex justify-between border-t pt-2 mt-2">
+                        <span class="text-gray-800 font-semibold">Estimated Total:</span>
+                        <span class="font-bold text-primary-600" id="totalEstimate">$0.00</span>
+                    </p>
+                </div>
+
+                <script>
+                    const qtyInput = document.querySelector("input[name='quantity']");
+                    const qtySummary = document.getElementById("qtySummary");
+                    const est = document.getElementById("totalEstimate");
+                    const price = @finalPrice; // Discount already applied
+
+                    qtyInput?.addEventListener("input", () => {
+                        const qty = parseInt(qtyInput.value || 0);
+                        qtySummary.textContent = qty;
+                        est.textContent = "$" + (qty * price).toFixed(2);
+                    });
+                </script>
+
+                <!-- Footer -->
                 <div class="flex justify-between items-center pt-4 border-t border-gray-200">
 
                     <a asp-area="Customer"
@@ -78,5 +178,6 @@
 
             </form>
         </div>
+
     </div>
 </div>

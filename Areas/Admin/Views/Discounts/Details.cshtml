@@ -1,0 +1,42 @@
+﻿@model StarEvents.Models.Discount
+
+@{
+    ViewData["Title"] = "Discount Details";
+}
+
+<div class="bg-white p-6 rounded-2xl shadow max-w-xl space-y-4">
+
+    <div>
+        <p class="text-sm text-gray-600">Promo Code</p>
+        <p class="font-semibold">@Model.Code</p>
+    </div>
+
+    <div>
+        <p class="text-sm text-gray-600">Percentage</p>
+        <p>@Model.Percentage%</p>
+    </div>
+
+    <div>
+        <p class="text-sm text-gray-600">Start Date</p>
+        <p>@Model.StartDate</p>
+    </div>
+
+    <div>
+        <p class="text-sm text-gray-600">End Date</p>
+        <p>@Model.EndDate</p>
+    </div>
+
+    <div>
+        <p class="text-sm text-gray-600">Status</p>
+        <p>@(Model.IsActive ? "Active" : "Inactive")</p>
+    </div>
+
+    <div class="flex justify-between pt-4">
+        <a asp-action="Index" class="text-gray-600 underline">Back to list</a>
+
+        <a asp-action="Edit" asp-route-id="@Model.DiscountId"
+           class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            Edit
+        </a>
+    </div>
+</div>

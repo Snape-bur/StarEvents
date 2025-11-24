@@ -1,0 +1,61 @@
+﻿@model StarEvents.Models.Booking
+
+@{
+    ViewData["Title"] = "Payment Successful!";
+}
+
+<div class="max-w-2xl mx-auto mt-14 bg-white rounded-3xl shadow-xl ring-1 ring-gray-200 p-8">
+
+    <!-- Header -->
+    <div class="text-center mb-8">
+        <div class="text-green-600 text-5xl mb-3">✔</div>
+        <h2 class="text-3xl font-extrabold text-gray-900">Payment Successful!</h2>
+        <p class="text-gray-500 mt-1">
+            Your booking is now confirmed.
+        </p>
+    </div>
+
+    <!-- Event Summary -->
+    <div class="bg-gray-50 rounded-2xl border p-5 mb-6 shadow-inner">
+        <h3 class="text-lg font-semibold text-gray-800 mb-2">🎫 Event Details</h3>
+
+        <p><strong>Event:</strong> @Model.Event?.Title</p>
+        <p><strong>Date:</strong> @Model.Event?.StartDate.ToString("dd MMM yyyy HH:mm")</p>
+        <p><strong>Venue:</strong> @Model.Event?.Venue?.Name</p>
+
+        <p class="mt-3"><strong>Tickets:</strong> @Model.Quantity</p>
+        @if (!string.IsNullOrWhiteSpace(Model.PromoCode))
+        {
+            <p><strong>Promo Used:</strong> @Model.PromoCode</p>
+        }
+        <p><strong>Total Paid:</strong> ฿@Model.FinalPrice.ToString("0.00")</p>
+    </div>
+
+    <!-- Ticket Actions -->
+    <div class="flex flex-col gap-3 mb-8">
+        <a href="@Model.QRCodePath"
+           download
+           class="w-full text-center bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 rounded-xl shadow-md transition">
+            📥 Download QR Code
+        </a>
+
+        <a asp-area="Customer"
+           asp-controller="Booking"
+           asp-action="DownloadTicket"
+           asp-route-id="@Model.BookingId"
+           class="w-full text-center border border-primary-600 text-primary-600 hover:bg-primary-50 font-semibold py-3 rounded-xl transition">
+            🎫 Download Ticket (PDF)
+        </a>
+    </div>
+
+    <!-- Next Action -->
+    <div class="text-center">
+        <a asp-area="Customer"
+           asp-controller="Booking"
+           asp-action="MyBookings"
+           class="text-sm text-gray-600 hover:text-primary-600 transition">
+            Go to My Bookings →
+        </a>
+    </div>
+
+</div>

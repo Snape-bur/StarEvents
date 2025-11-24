@@ -16,7 +16,7 @@ namespace StarEvents.Areas.Admin.Controllers
         }
 
         // GET: Admin/Bookings
-        public async Task<IActionResult> Index(string status, int? eventId)
+        public async Task<IActionResult> Index(string status, int? eventId, int page = 1, int pageSize = 10)
         {
             var query = _context.Bookings
                 .Include(b => b.Event)
@@ -30,7 +30,7 @@ namespace StarEvents.Areas.Admin.Controllers
             if (eventId.HasValue)
                 query = query.Where(b => b.EventId == eventId);
 
-            // Pass dropdown data
+            // Dropdown data
             ViewBag.Events = await _context.Events
                 .OrderBy(e => e.Title)
                 .ToListAsync();
@@ -39,12 +39,23 @@ namespace StarEvents.Areas.Admin.Controllers
             ViewBag.SelectedStatus = status;
             ViewBag.SelectedEventId = eventId;
 
+            // Pagination counts
+            int totalItems = await query.CountAsync();
+            int totalPages = (int)Math.Ceiling(totalItems / (double)pageSize);
+
+            ViewBag.CurrentPage = page;
+            ViewBag.TotalPages = totalPages;
+
+            // Load page
             var bookings = await query
                 .OrderByDescending(b => b.BookingDate)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
                 .ToListAsync();
 
             return View(bookings);
         }
+
 
 
         // GET: Admin/Bookings/Details/5

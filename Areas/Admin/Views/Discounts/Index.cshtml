@@ -1,0 +1,73 @@
+﻿@model IEnumerable<StarEvents.Models.Discount>
+
+@{
+    ViewData["Title"] = "Discounts";
+}
+
+<div class="mb-6">
+    <a asp-action="Create"
+       class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition">
+        + Add Discount
+    </a>
+</div>
+
+<div class="overflow-x-auto bg-white rounded-2xl shadow">
+    <table class="min-w-full text-sm text-gray-700">
+        <thead class="bg-blue-600 text-white rounded-t-2xl">
+            <tr>
+                <th class="py-3 px-4 text-left">Code</th>
+                <th class="py-3 px-4 text-left">Percentage</th>
+                <th class="py-3 px-4 text-left">Start</th>
+                <th class="py-3 px-4 text-left">End</th>
+                <th class="py-3 px-4 text-left">Status</th>
+                <th class="py-3 px-4 text-center">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody class="divide-y divide-gray-100">
+            @foreach (var item in Model)
+            {
+                var isActive = item.IsActive && item.StartDate <= DateTime.UtcNow && item.EndDate >= DateTime.UtcNow;
+
+                <tr class="hover:bg-gray-50">
+                    <td class="py-3 px-4 font-semibold">@item.Code</td>
+                    <td class="py-3 px-4">@item.Percentage%</td>
+                    <td class="py-3 px-4">@item.StartDate.ToShortDateString()</td>
+                    <td class="py-3 px-4">@item.EndDate.ToShortDateString()</td>
+
+                    <td class="py-3 px-4">
+                        @if (isActive)
+                        {
+                            <span class="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full font-semibold">
+                                Active
+                            </span>
+                        }
+                        else if (!item.IsActive)
+                        {
+                            <span class="px-3 py-1 bg-gray-200 text-gray-700 text-xs rounded-full font-semibold">
+                                Disabled
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full font-semibold">
+                                Expired
+                            </span>
+                        }
+                    </td>
+
+                    <td class="py-3 px-4 text-center space-x-3">
+                        <a asp-action="Details" asp-route-id="@item.DiscountId"
+                           class="text-blue-600 underline text-sm">View</a>
+
+                        <a asp-action="Edit" asp-route-id="@item.DiscountId"
+                           class="text-blue-600 underline text-sm">Edit</a>
+
+                        <a asp-action="Delete" asp-route-id="@item.DiscountId"
+                           class="text-red-600 underline text-sm">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

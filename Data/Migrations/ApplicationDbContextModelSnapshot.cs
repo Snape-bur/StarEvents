@@ -253,11 +253,26 @@ namespace StarEvents.Data.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
+                    b.Property<decimal?>("DiscountAmount")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("EventId")
                         .HasColumnType("int");
 
+                    b.Property<decimal>("FinalPrice")
+                        .HasColumnType("decimal(10,2)");
+
                     b.Property<int>("PaymentStatus")
                         .HasColumnType("int");
+
+                    b.Property<decimal?>("PointsDiscountAmount")
+                        .HasColumnType("decimal(10,2)");
+
+                    b.Property<int?>("PointsRedeemed")
+                        .HasColumnType("int");
+
+                    b.Property<string>("PromoCode")
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("QRCodePath")
                         .HasMaxLength(250)
@@ -265,6 +280,9 @@ namespace StarEvents.Data.Migrations
 
                     b.Property<int>("Quantity")
                         .HasColumnType("int");
+
+                    b.Property<DateTime?>("ReservationExpiresAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -303,6 +321,40 @@ namespace StarEvents.Data.Migrations
                     b.HasKey("CategoryId");
 
                     b.ToTable("Categories");
+                });
+
+            modelBuilder.Entity("StarEvents.Models.Discount", b =>
+                {
+                    b.Property<int>("DiscountId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("DiscountId"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("EndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int?>("EventId")
+                        .HasColumnType("int");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<decimal>("Percentage")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("StartDate")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("DiscountId");
+
+                    b.HasIndex("EventId");
+
+                    b.ToTable("Discounts");
                 });
 
             modelBuilder.Entity("StarEvents.Models.Event", b =>
@@ -363,6 +415,68 @@ namespace StarEvents.Data.Migrations
                     b.HasIndex("VenueId");
 
                     b.ToTable("Events");
+                });
+
+            modelBuilder.Entity("StarEvents.Models.LoyaltyPoint", b =>
+                {
+                    b.Property<int>("LoyaltyPointId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LoyaltyPointId"));
+
+                    b.Property<DateTime>("LastUpdated")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("Points")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("LoyaltyPointId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("LoyaltyPoints");
+                });
+
+            modelBuilder.Entity("StarEvents.Models.LoyaltyTransaction", b =>
+                {
+                    b.Property<int>("LoyaltyTransactionId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("LoyaltyTransactionId"));
+
+                    b.Property<int?>("BookingId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
+                    b.Property<int>("PointsChange")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Type")
+                        .HasColumnType("int");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("LoyaltyTransactionId");
+
+                    b.HasIndex("BookingId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("LoyaltyTransactions");
                 });
 
             modelBuilder.Entity("StarEvents.Models.Venue", b =>
@@ -465,6 +579,15 @@ namespace StarEvents.Data.Migrations
                     b.Navigation("Event");
                 });
 
+            modelBuilder.Entity("StarEvents.Models.Discount", b =>
+                {
+                    b.HasOne("StarEvents.Models.Event", "Event")
+                        .WithMany("Discounts")
+                        .HasForeignKey("EventId");
+
+                    b.Navigation("Event");
+                });
+
             modelBuilder.Entity("StarEvents.Models.Event", b =>
                 {
                     b.HasOne("StarEvents.Models.Category", "Category")
@@ -490,9 +613,39 @@ namespace StarEvents.Data.Migrations
                     b.Navigation("Venue");
                 });
 
+            modelBuilder.Entity("StarEvents.Models.LoyaltyPoint", b =>
+                {
+                    b.HasOne("StarEvents.Models.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("StarEvents.Models.LoyaltyTransaction", b =>
+                {
+                    b.HasOne("StarEvents.Models.Booking", "Booking")
+                        .WithMany()
+                        .HasForeignKey("BookingId");
+
+                    b.HasOne("StarEvents.Models.AppUser", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Booking");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("StarEvents.Models.Event", b =>
                 {
                     b.Navigation("Bookings");
+
+                    b.Navigation("Discounts");
                 });
 #pragma warning restore 612, 618
         }

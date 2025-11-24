@@ -19,6 +19,9 @@ namespace StarEvents.Data
 
         public DbSet<Booking> Bookings { get; set; } = default!;
 
+        public DbSet<Discount> Discounts { get; set; } = default!;
+        public DbSet<LoyaltyPoint> LoyaltyPoints { get; set; } = default!;
 
+        public DbSet<LoyaltyTransaction> LoyaltyTransactions { get; set; } = null!;
     }
 }

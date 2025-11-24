@@ -46,6 +46,9 @@ namespace StarEvents.Models
         [Required, StringLength(50)]
         public string Status { get; set; } = "Pending"; // e.g., Pending, Approved, Rejected
 
+        public List<Discount>? Discounts { get; set; }
+
+
         public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
         public ICollection<Booking> Bookings { get; set; } = new List<Booking>();

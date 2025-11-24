@@ -16,6 +16,9 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 
 builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
+builder.Services.AddHostedService<BookingExpiryService>();
+
+
 //  Updated Identity configuration to use AppUser + Roles
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {

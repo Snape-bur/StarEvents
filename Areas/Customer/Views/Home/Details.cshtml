@@ -87,15 +87,21 @@
                 ← Back to Events
             </a>
 
-            <!-- Book Now -->
-            <a asp-area="Customer"
-               asp-controller="Booking"
-               asp-action="Create"
-               asp-route-id="@Model.EventId"
-               class="bg-primary-600 hover:bg-primary-700 text-white font-semibold px-5 py-2.5
-                      rounded-xl shadow-md shadow-primary-600/30 transition active:scale-[0.97]">
-                Book Now
-            </a>
+            <form asp-area="Customer"
+                  asp-controller="Booking"
+                  asp-action="Checkout"
+                  method="post">
+
+                <input type="hidden" name="eventId" value="@Model.EventId" />
+                <input type="hidden" name="quantity" value="1" />
+
+                <button type="submit"
+                        class="bg-primary-600 hover:bg-primary-700 text-white font-semibold px-5 py-2.5
+                   rounded-xl shadow-md shadow-primary-600/30 transition active:scale-[0.97]">
+                    Book Now
+                </button>
+            </form>
+
         </div>
 
     </div>

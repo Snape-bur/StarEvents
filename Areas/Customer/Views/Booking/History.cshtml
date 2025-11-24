@@ -9,16 +9,16 @@
     <!-- Header -->
     <div class="mb-8">
         <h1 class="text-3xl font-extrabold tracking-tight text-primary-600">
-            📜 Booking History
+            Booking History
         </h1>
-        <p class="text-gray-500 text-sm mt-1">Your past attended or completed events</p>
+        <p class="text-gray-500 text-sm mt-1">Your previously paid events</p>
     </div>
 
     <!-- No History -->
-    @if (!Model.Any(b => b.Status == "Completed" || b.Status == "Attended"))
+    @if (!Model.Any())
     {
         <div class="text-center py-20 bg-white rounded-3xl shadow-xl ring-1 ring-gray-200">
-            <p class="text-gray-600 text-lg">You have no completed bookings yet.</p>
+            <p class="text-gray-600 text-lg">You have no past paid bookings.</p>
             <p class="text-gray-400 text-sm mt-1">Attend events to see them appear here!</p>
         </div>
     }
@@ -27,7 +27,7 @@
         <!-- Grid -->
         <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
 
-            @foreach (var b in Model.Where(b => b.Status == "Completed" || b.Status == "Attended"))
+            @foreach (var b in Model)
             {
                 <div class="rounded-3xl overflow-hidden bg-white shadow-lg ring-1 ring-gray-200 hover:shadow-2xl hover:ring-primary-300 transition">
 
@@ -36,7 +36,7 @@
                         <h2 class="text-lg font-semibold text-primary-700">@b.Event?.Title</h2>
                         <p class="text-gray-600 text-sm">@b.Event?.Venue?.Name</p>
                         <p class="text-xs text-gray-500 mt-1">
-                            Booked on @b.BookingDate.ToString("dd MMM yyyy")
+                            Event Date: @b.Event.StartDate.ToString("dd MMM yyyy HH:mm")
                         </p>
                     </div>
 
@@ -47,7 +47,7 @@
                         <p class="text-gray-700 mb-1">
                             <strong>Total Paid:</strong>
                             <span class="text-primary-600 font-semibold">
-                                $@b.TotalPrice.ToString("0.00")
+                                ฿@b.FinalPrice.ToString("0.00")
                             </span>
                         </p>
 
@@ -55,25 +55,27 @@
                         <p class="text-sm text-gray-500 mb-4">
                             Status:
                             <span class="font-semibold text-green-600">
-                                @b.Status
+                                Paid
                             </span>
                         </p>
 
                         <!-- QR Code -->
                         @if (!string.IsNullOrEmpty(b.QRCodePath))
                         {
-                            <img src="@b.QRCodePath.Replace("wwwroot", "")"
+                            <img src="@b.QRCodePath"
                                  alt="QR Code"
                                  class="w-32 h-32 mb-4 rounded-xl border shadow-sm ring-1 ring-gray-200 bg-white" />
                         }
 
                         <!-- Ticket Button -->
-                        <a asp-action="Ticket"
+                        <a asp-area="Customer"
+                           asp-controller="Booking"
+                           asp-action="DownloadTicket"
                            asp-route-id="@b.BookingId"
                            class="inline-block bg-primary-600 hover:bg-primary-700 text-white
                                           text-sm font-semibold px-5 py-2.5 rounded-xl shadow-md
                                           transition active:scale-[0.97]">
-                            🎫 View Ticket
+                            Download Ticket
                         </a>
 
                     </div>

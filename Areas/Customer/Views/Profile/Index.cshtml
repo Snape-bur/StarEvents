@@ -8,10 +8,9 @@
     <!-- 🔵 Gradient Header -->
     <div class="px-6 py-5 bg-gradient-to-r from-primary-600 to-primary-500 text-white">
         <h2 class="text-2xl font-extrabold tracking-tight">My Profile</h2>
-        <p class="text-primary-100 text-sm">Manage and update your personal details</p>
+        <p class="text-primary-100 text-sm">Manage your details & check your loyalty points</p>
     </div>
 
-    <!-- 📝 Form Section -->
     <div class="p-8">
 
         @if (TempData["Success"] != null)
@@ -20,6 +19,13 @@
                 @TempData["Success"]
             </div>
         }
+
+        <!-- ⭐ Loyalty Points Card -->
+        <div class="mb-8 bg-primary-50 border border-primary-200 rounded-2xl p-5 shadow-inner">
+            <p class="text-sm text-primary-700 font-semibold">⭐ Loyalty Points</p>
+            <p class="text-3xl font-extrabold text-primary-700 mt-1">@Model.LoyaltyPoints pts</p>
+            <p class="text-xs text-primary-600 mt-1">Earn points every time you book and redeem them for discounts.</p>
+        </div>
 
         <form asp-action="Index" method="post" class="space-y-6">
 
@@ -38,7 +44,7 @@
                 <input asp-for="Email"
                        readonly
                        class="w-full rounded-xl border border-gray-200 bg-gray-100 px-4 py-3
-                              text-gray-500 cursor-not-allowed" />
+                  text-gray-500 cursor-not-allowed" />
             </div>
 
             <!-- Phone -->
@@ -50,7 +56,6 @@
                 <span asp-validation-for="PhoneNumber" class="text-red-500 text-sm"></span>
             </div>
 
-            <!-- Submit -->
             <button type="submit"
                     class="w-full bg-primary-600 text-white font-semibold py-3 rounded-xl
                            shadow-md shadow-primary-600/20 hover:bg-primary-700 transition active:scale-[0.97]">

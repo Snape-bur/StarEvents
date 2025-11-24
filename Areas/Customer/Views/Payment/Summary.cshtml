@@ -1,0 +1,77 @@
+﻿@model StarEvents.Models.Booking
+
+@{
+    ViewData["Title"] = "Booking Summary";
+    var expires = Model.ReservationExpiresAt?.ToString("yyyy-MM-ddTHH:mm:ssZ");
+}
+
+<div class="max-w-xl mx-auto mt-12 bg-white rounded-3xl shadow-xl p-8">
+
+    <h2 class="text-2xl font-bold mb-4">Booking Summary</h2>
+
+    <!-- Timer -->
+    <div id="timerBox"
+         class="bg-primary-50 border border-primary-200 rounded-xl p-4 mb-6">
+
+        <p class="font-semibold text-gray-700">Your seats are reserved for:</p>
+        <p id="timer" class="text-3xl font-bold text-primary-600">--:--</p>
+    </div>
+
+    <script>
+        const expiresAt = new Date("@expires");
+
+        function updateTimer() {
+            const now = Date.now();
+            const diff = expiresAt - now;
+
+            if (diff <= 0) {
+                window.location.href = "/Customer/Booking/MyBookings";
+                return;
+            }
+
+            const m = Math.floor(diff / 60000);
+            const s = Math.floor((diff / 1000) % 60);
+
+            document.getElementById("timer").innerText =
+                m.toString().padStart(2, "0") + ":" + s.toString().padStart(2, "0");
+        }
+
+        updateTimer();
+        setInterval(updateTimer, 1000);
+    </script>
+
+    <!-- Final Details -->
+    <div class="space-y-2 border-b pb-4 mb-6">
+        <p><strong>Event:</strong> @Model.Event.Title</p>
+        <p><strong>Quantity:</strong> @Model.Quantity</p>
+        <p><strong>Total:</strong> ฿@Model.FinalPrice.ToString("0.00")</p>
+
+        @if (Model.PointsRedeemed > 0)
+        {
+            <p class="text-green-600 text-sm">
+                Used @Model.PointsRedeemed points → Saved ฿@Model.PointsDiscountAmount.Value.ToString("0.00")
+            </p>
+        }
+
+    </div>
+
+    <!-- Pay -->
+    <form asp-area="Customer"
+          asp-controller="Payment"
+          asp-action="Confirm"
+          method="post"
+          class="space-y-4">
+
+        <input type="hidden" name="id" value="@Model.BookingId" />
+
+        <button class="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 rounded-xl">
+            💳 Confirm & Pay
+        </button>
+    </form>
+
+    <a asp-area="Customer" asp-controller="Booking" asp-action="MyBookings"
+       class="block text-center text-gray-500 mt-4">
+        Cancel and return to My Bookings
+    </a>
+
+</div>

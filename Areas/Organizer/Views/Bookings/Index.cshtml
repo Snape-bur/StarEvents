@@ -1,13 +1,54 @@
 ﻿@model IEnumerable<StarEvents.Models.Booking>
+
 @{
     ViewData["Title"] = "Bookings";
+
+    var events = ViewBag.Events as List<SelectListItem>;
+    int? selectedEventId = ViewBag.SelectedEventId;
+    int currentPage = ViewBag.CurrentPage;
+    int totalPages = ViewBag.TotalPages;
 }
 
 <div class="max-w-7xl mx-auto mt-10">
+
     <h1 class="text-3xl font-bold text-blue-700 mb-6">My Event Bookings</h1>
 
+    <form method="get" class="flex items-center gap-4 mb-5">
+
+        <!-- Event Filter -->
+        <select name="eventId"
+                class="rounded-xl border border-gray-300 px-4 py-2 text-gray-700">
+            <option value="">All Events</option>
+
+            @foreach (var e in (List<SelectListItem>)ViewBag.Events)
+            {
+                <option value="@e.Value" selected="@(ViewBag.SelectedEventId?.ToString() == e.Value)">
+                    @e.Text
+                </option>
+            }
+        </select>
+
+        <!-- Status Filter -->
+        <select name="status"
+                class="rounded-xl border border-gray-300 px-4 py-2 text-gray-700">
+            <option value="All" selected="@(ViewBag.SelectedStatus == null || ViewBag.SelectedStatus == "All")">
+                All Status
+            </option>
+
+            <option value="Paid" selected="@(ViewBag.SelectedStatus == "Paid")">Paid</option>
+            <option value="Pending" selected="@(ViewBag.SelectedStatus == "Pending")">Pending</option>
+            <option value="Cancelled" selected="@(ViewBag.SelectedStatus == "Cancelled")">Cancelled</option>
+        </select>
+
+        <button class="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2 rounded-xl">
+            Filter
+        </button>
+    </form>
+
+
+    <!-- TABLE -->
     <div class="overflow-x-auto bg-white shadow rounded-xl ring-1 ring-black/5">
-        <table class="min-w-full text-sm text-left text-gray-700 border-collapse">
+        <table class="min-w-full text-sm text-left text-gray-700">
             <thead class="bg-blue-50 text-blue-700 uppercase text-xs font-semibold">
                 <tr>
                     <th class="px-6 py-3">Event</th>
@@ -19,32 +60,93 @@
                     <th class="px-6 py-3 text-center">Actions</th>
                 </tr>
             </thead>
+
             <tbody class="divide-y divide-gray-200">
+
                 @foreach (var item in Model)
                 {
                     <tr class="hover:bg-blue-50 transition">
                         <td class="px-6 py-4 font-medium">@item.Event?.Title</td>
-                        <td class="px-6 py-4">@item.Customer?.FullName ?? @item.Customer?.Email</td>
+
+                        <td class="px-6 py-4">
+                            @item.Customer?.FullName ?? item.Customer?.Email
+                        </td>
+
                         <td class="px-6 py-4">@item.Quantity</td>
-                        <td class="px-6 py-4 text-green-700">$@item.TotalPrice.ToString("0.00")</td>
+
+                        <td class="px-6 py-4 text-green-700">
+                            $@item.FinalPrice.ToString("0.00")
+                        </td>
+
                         <td class="px-6 py-4">
                             @if (item.Status == "Paid")
                             {
-                                <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">@item.Status</span>
+                                <span class="px-2 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full">
+                                    Paid
+                                </span>
+                            }
+                            else if (item.Status == "Cancelled")
+                            {
+                                <span class="px-2 py-1 bg-red-100 text-red-700 text-xs font-medium rounded-full">
+                                    Cancelled
+                                </span>
                             }
                             else
                             {
-                                <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">@item.Status</span>
+                                <span class="px-2 py-1 bg-yellow-100 text-yellow-700 text-xs font-medium rounded-full">
+                                    Pending
+                                </span>
                             }
                         </td>
-                        <td class="px-6 py-4 text-gray-500">@item.BookingDate.ToString("MMM dd, yyyy")</td>
+
+                        <td class="px-6 py-4 text-gray-500">
+                            @item.BookingDate.ToString("MMM dd, yyyy")
+                        </td>
+
                         <td class="px-6 py-4 text-center">
-                            <a asp-action="Details" asp-route-id="@item.BookingId"
-                               class="text-blue-600 hover:underline">View</a>
+                            <a asp-action="Details"
+                               asp-route-id="@item.BookingId"
+                               class="text-blue-600 hover:underline font-medium">
+                                View
+                            </a>
                         </td>
                     </tr>
                 }
+
             </tbody>
         </table>
     </div>
+
+    <!-- PAGINATION -->
+    <div class="flex items-center justify-center gap-3 mt-6">
+
+        <!-- Previous -->
+        @if (currentPage > 1)
+        {
+            <a asp-action="Index"
+               asp-route-page="@(currentPage - 1)"
+               asp-route-eventId="@selectedEventId"
+               class="px-4 py-2 bg-gray-200 rounded-xl hover:bg-gray-300">
+                ← Previous
+            </a>
+        }
+
+        <!-- Page Indicator -->
+        <span class="px-4 py-2 text-gray-700 font-medium">
+            Page @currentPage of @totalPages
+        </span>
+
+        <!-- Next -->
+        @if (currentPage < totalPages)
+        {
+            <a asp-action="Index"
+               asp-route-page="@(currentPage + 1)"
+               asp-route-eventId="@selectedEventId"
+               class="px-4 py-2 bg-gray-200 rounded-xl hover:bg-gray-300">
+                Next →
+            </a>
+        }
+
+    </div>
+
 </div>

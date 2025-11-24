@@ -1,49 +1,78 @@
-﻿@model StarEvents.Models.Booking
+﻿@model StarEvents.Models.Event
+
 @{
     ViewData["Title"] = "Checkout";
+
+    var discount = Model.Discounts?
+        .FirstOrDefault(d =>
+            d.IsActive &&
+            d.StartDate <= DateTime.UtcNow &&
+            d.EndDate >= DateTime.UtcNow
+        );
+
+    decimal originalPrice = Model.TicketPrice;
+    decimal finalPrice = discount != null
+        ? originalPrice - (originalPrice * discount.Percentage / 100)
+        : originalPrice;
+
+    int loyaltyPoints = ViewBag.LoyaltyPoints ?? 0;
+    int blocks = loyaltyPoints / 100;
+    if (blocks > 5) blocks = 5;
 }
 
-<div class="max-w-xl mx-auto mt-12 bg-white rounded-3xl shadow-xl ring-1 ring-gray-200 overflow-hidden">
+<div class="max-w-2xl mx-auto mt-12 bg-white rounded-3xl shadow-xl p-8">
 
-    <!-- 🔵 Gradient Header -->
-    <div class="bg-gradient-to-r from-primary-600 to-primary-500 px-6 py-5 text-white">
-        <h2 class="text-2xl font-extrabold tracking-tight">Checkout</h2>
-        <p class="text-sm text-primary-100">Confirm your booking and secure your tickets</p>
-    </div>
+    <h2 class="text-2xl font-bold mb-4">Checkout</h2>
 
-    <!-- 🧾 Summary Section -->
-    <div class="p-6 text-gray-800">
-        <div class="space-y-2 pb-4 mb-4 border-b border-gray-200">
-            <p><span class="font-semibold text-gray-900">Event:</span> @Model.Event?.Title</p>
-            <p><span class="font-semibold text-gray-900">Date:</span> @Model.Event?.StartDate.ToString("dd MMM yyyy hh:mm tt")</p>
-            <p><span class="font-semibold text-gray-900">Tickets:</span> @Model.Quantity</p>
+    <p class="text-gray-600 mb-6">
+        Select your ticket quantity and apply discounts.
+    </p>
 
-            <p class="mt-3 text-lg font-semibold text-primary-600">
-                Total: $@Model.TotalPrice.ToString("0.00")
-            </p>
+    <form asp-area="Customer"
+          asp-controller="Booking"
+          asp-action="CreateBooking"
+          method="post"
+          class="space-y-6">
+
+        <input type="hidden" name="EventId" value="@Model.EventId" />
+
+        <!-- Quantity -->
+        <div>
+            <label class="font-semibold">Quantity</label>
+            <select name="Quantity" class="w-full border p-3 rounded-xl mt-1">
+                @for (int i = 1; i <= Model.AvailableSeats; i++)
+                {
+                    <option value="@i">@i ticket(s)</option>
+                }
+            </select>
         </div>
 
-        <p class="text-gray-600 mb-6">
-            Please confirm your payment to complete your booking.
-        </p>
+        <!-- Promo Code -->
+        <div>
+            <label class="font-semibold">Promo Code (optional)</label>
+            <input type="text" name="PromoCode"
+                   class="w-full border p-3 rounded-xl mt-1"
+                   placeholder="Enter promo code" />
+        </div>
 
-        <!-- 💳 Pay Now Button -->
-        <form asp-action="Confirm" method="post">
-            <input type="hidden" name="id" value="@Model.BookingId" />
+        <!-- Redeem Points -->
+        <div>
+            <label class="font-semibold">Redeem Points (optional)</label>
+            <select name="RedeemPercent" class="w-full border p-3 rounded-xl mt-1">
+                <option value="0">Do not use points</option>
 
-            <button type="submit"
-                    class="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold
-                       px-6 py-3 rounded-xl shadow-md shadow-primary-600/20
-                       transition active:scale-[0.97]">
-                💳 Pay Now
-            </button>
-        </form>
+                @for (int i = 1; i <= blocks; i++)
+                {
+                    <option value="@(i * 10)">
+                        Use @(i * 100) pts → @((i * 10))% off
+                    </option>
+                }
+            </select>
+        </div>
 
-        <!-- 🔙 Cancel -->
-        <a asp-area="Customer" asp-controller="Booking" asp-action="MyBookings"
-           class="block text-center text-gray-500 mt-5 hover:text-primary-600 transition">
-            Cancel and return to My Bookings
-        </a>
-    </div>
+        <button class="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 rounded-xl">
+            Continue →
+        </button>
+    </form>
 
 </div>
