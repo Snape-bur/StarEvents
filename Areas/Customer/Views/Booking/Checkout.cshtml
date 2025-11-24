@@ -18,15 +18,33 @@
     int loyaltyPoints = ViewBag.LoyaltyPoints ?? 0;
     int blocks = loyaltyPoints / 100;
     if (blocks > 5) blocks = 5;
+
+    // ==========================
+    // Ticket Limit Logic
+    // ==========================
+    int maxPerUser = 4;
+    int alreadyBought = ViewBag.AlreadyBought != null ? (int)ViewBag.AlreadyBought : 0;
+    int remainingAllowed = maxPerUser - alreadyBought;
+    if (remainingAllowed < 0) remainingAllowed = 0;
 }
 
 <div class="max-w-2xl mx-auto mt-12 bg-white rounded-3xl shadow-xl p-8">
 
     <h2 class="text-2xl font-bold mb-4">Checkout</h2>
 
-    <p class="text-gray-600 mb-6">
-        Select your ticket quantity and apply discounts.
-    </p>
+    @if (alreadyBought >= maxPerUser)
+    {
+        <div class="mb-4 bg-red-100 border border-red-200 text-red-700 px-4 py-3 rounded-xl">
+            You have already purchased the maximum of @maxPerUser tickets for this event.
+        </div>
+    }
+    else
+    {
+        <div class="mb-4 bg-blue-50 border border-blue-200 text-blue-700 px-4 py-3 rounded-xl">
+            You already bought <strong>@alreadyBought</strong> ticket(s).
+            You can still buy <strong>@remainingAllowed</strong> more.
+        </div>
+    }
 
     <form asp-area="Customer"
           asp-controller="Booking"
@@ -34,23 +52,35 @@
           method="post"
           class="space-y-6">
 
-        <input type="hidden" name="EventId" value="@Model.EventId" />
+        <input type="hidden" name="eventId" value="@Model.EventId" />
 
         <!-- Quantity -->
         <div>
             <label class="font-semibold">Quantity</label>
-            <select name="Quantity" class="w-full border p-3 rounded-xl mt-1">
-                @for (int i = 1; i <= Model.AvailableSeats; i++)
-                {
-                    <option value="@i">@i ticket(s)</option>
-                }
-            </select>
+
+            @if (remainingAllowed <= 0)
+            {
+                <select class="w-full border p-3 rounded-xl mt-1" disabled>
+                    <option>You reached the ticket limit</option>
+                </select>
+            }
+            else
+            {
+                var maxSelectable = Math.Min(Model.AvailableSeats, remainingAllowed);
+
+                <select name="quantity" class="w-full border p-3 rounded-xl mt-1">
+                    @for (int i = 1; i <= maxSelectable; i++)
+                    {
+                        <option value="@i">@i ticket(s)</option>
+                    }
+                </select>
+            }
         </div>
 
         <!-- Promo Code -->
         <div>
             <label class="font-semibold">Promo Code (optional)</label>
-            <input type="text" name="PromoCode"
+            <input type="text" name="promoCode"
                    class="w-full border p-3 rounded-xl mt-1"
                    placeholder="Enter promo code" />
         </div>
@@ -62,7 +92,7 @@
             </label>
 
             <select name="redeemPercent"
-                    class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm focus:ring-primary-600 focus:border-primary-600">
+                    class="w-full rounded-xl border border-gray-300 px-4 py-2.5 text-sm">
 
                 <option value="0">
                     Do not use points — You have @loyaltyPoints pts
@@ -70,31 +100,25 @@
 
                 @for (int percent = 10; percent <= 50; percent += 10)
                 {
-                    int required = percent * 10; // 10% = 100 pts
+                    int required = percent * 10;
                     if (loyaltyPoints >= required)
                     {
-                        <option value="@percent">
-                            Use @required pts → @percent% off
-                        </option>
+                        <option value="@percent">Use @required pts → @percent% off</option>
                     }
                     else
                     {
-                        <option value="@percent" disabled>
-                            Use @required pts → Need @required pts (You have @loyaltyPoints)
-                        </option>
+                        <option disabled>Use @required pts → Need @required pts (You have @loyaltyPoints)</option>
                     }
                 }
             </select>
-
-            <p class="mt-1 text-xs text-gray-500">
-                Every <strong>100 points = 10% off</strong> (Up to 50% max)
-            </p>
-
         </div>
 
-        <button class="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 rounded-xl">
+        <button class="w-full bg-primary-600 hover:bg-primary-700 text-white font-semibold py-3 rounded-xl
+                      @(remainingAllowed <= 0 ? "opacity-50 cursor-not-allowed" : "")"
+                @(remainingAllowed <= 0 ? "disabled" : "")>
             Continue →
         </button>
+
     </form>
 
 </div>

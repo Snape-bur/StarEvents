@@ -38,13 +38,24 @@ namespace StarEvents.Areas.Customer.Controllers
             if (ev == null)
                 return NotFound();
 
-            // Load points
             var user = await _userManager.GetUserAsync(User);
+
+            // Load points
             var lp = await _context.LoyaltyPoints.FirstOrDefaultAsync(x => x.UserId == user.Id);
             ViewBag.LoyaltyPoints = lp?.Points ?? 0;
 
+            // ✅ Count tickets already bought for THIS event by THIS user
+            var alreadyBought = await _context.Bookings
+                .Where(b => b.CustomerId == user.Id &&
+                            b.EventId == eventId &&
+                            b.Status == "Paid")
+                .SumAsync(b => (int?)b.Quantity ?? 0);
+
+            ViewBag.AlreadyBought = alreadyBought;
+
             return View(ev);
         }
+
 
         // ============================================================
         // STEP 2: Create Booking → Apply promo + redeem → Timer starts
@@ -58,16 +69,35 @@ namespace StarEvents.Areas.Customer.Controllers
             var ev = await _context.Events.FirstOrDefaultAsync(e => e.EventId == eventId);
             if (ev == null) return NotFound();
 
+            // ============================================
+            // 1. MAX TICKETS LIMIT VALIDATION (IMPORTANT)
+            // ============================================
+            var alreadyBought = await _context.Bookings
+                .Where(b => b.CustomerId == user.Id &&
+                            b.EventId == eventId &&
+                            b.Status == "Paid")
+                .SumAsync(b => (int?)b.Quantity ?? 0);
+
+            if (alreadyBought + quantity > 4)
+            {
+                TempData["Error"] = "You cannot buy more than 4 tickets for this event.";
+                return RedirectToAction("Checkout", new { eventId });
+            }
+
+            // Basic quantity validation
             if (quantity < 1 || quantity > ev.AvailableSeats)
             {
                 TempData["Error"] = "Invalid quantity selected.";
                 return RedirectToAction("Checkout", new { eventId });
             }
 
+            // ============================================
+            // 2. CALCULATE FINAL PRICE + DISCOUNTS
+            // ============================================
             decimal baseTotal = ev.TicketPrice * quantity;
             decimal finalTotal = baseTotal;
 
-            // ========= APPLY PROMO =========
+            // --- PROMO CODE ---
             decimal promoDiscount = 0;
             if (!string.IsNullOrWhiteSpace(promoCode))
             {
@@ -84,14 +114,14 @@ namespace StarEvents.Areas.Customer.Controllers
                 }
             }
 
-            // ========= APPLY REDEEM POINTS =========
+            // --- REDEEM POINTS ---
             var lp = await _context.LoyaltyPoints.FirstOrDefaultAsync(x => x.UserId == user.Id);
             int currentPoints = lp?.Points ?? 0;
 
             if (redeemPercent > 50) redeemPercent = 50;
             if (redeemPercent < 0) redeemPercent = 0;
 
-            int requiredPoints = redeemPercent * 10; // 10% = 100 pts
+            int requiredPoints = redeemPercent * 10; // 10% = 100 points
 
             if (requiredPoints > currentPoints)
             {
@@ -107,7 +137,9 @@ namespace StarEvents.Areas.Customer.Controllers
                 finalTotal -= redeemDiscount;
             }
 
-            // ========= CREATE BOOKING =========
+            // ============================================
+            // 3. CREATE BOOKING
+            // ============================================
             var booking = new Booking
             {
                 CustomerId = user.Id,
@@ -133,6 +165,7 @@ namespace StarEvents.Areas.Customer.Controllers
 
             return RedirectToAction("Summary", new { id = booking.BookingId });
         }
+
 
         // ============================================================
         // STEP 3: Summary Page (Timer + Final Price)

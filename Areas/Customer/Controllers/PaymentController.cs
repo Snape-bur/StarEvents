@@ -38,7 +38,9 @@ namespace StarEvents.Areas.Customer.Controllers
 
             if (booking == null) return NotFound();
 
-            // EXPIRED CHECK
+            // ----------------------------------
+            // 1. EXPIRED CHECK
+            // ----------------------------------
             if (booking.ReservationExpiresAt < DateTime.UtcNow)
             {
                 booking.Status = "Expired";
@@ -57,11 +59,26 @@ namespace StarEvents.Areas.Customer.Controllers
                 return RedirectToAction("MyBookings", "Booking");
             }
 
-            // --------------------------------------------
-            // ========== Loyalty Points Adjustments ==========
-            // --------------------------------------------
-            var lp = await _context.LoyaltyPoints
-                .FirstOrDefaultAsync(x => x.UserId == user.Id);
+            // ----------------------------------
+            // 2. MAX LIMIT FINAL VALIDATION
+            // ----------------------------------
+            var alreadyPaid = await _context.Bookings
+                .Where(b => b.CustomerId == user.Id &&
+                            b.EventId == booking.EventId &&
+                            b.Status == "Paid" &&
+                            b.BookingId != booking.BookingId)
+                .SumAsync(b => (int?)b.Quantity ?? 0);
+
+            if (alreadyPaid + booking.Quantity > 4)
+            {
+                TempData["Error"] = "Purchase limit exceeded: maximum 4 tickets allowed for this event.";
+                return RedirectToAction("MyBookings", "Booking");
+            }
+
+            // ----------------------------------
+            // 3. LOYALTY POINT ADJUSTMENTS
+            // ----------------------------------
+            var lp = await _context.LoyaltyPoints.FirstOrDefaultAsync(x => x.UserId == user.Id);
 
             if (lp == null)
             {
@@ -75,28 +92,27 @@ namespace StarEvents.Areas.Customer.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            // 1. Deduct redeemed points (IMPORTANT FIX)
+            // Deduct redeemed points
             var redeemed = booking.PointsRedeemed ?? 0;
-
             if (redeemed > 0)
             {
                 lp.Points = Math.Max(0, lp.Points - redeemed);
             }
 
-            // 2. Earn new points
-            int earned = (int)(booking.FinalPrice / 100m); // 1 point = ฿100
+            // Earn new points
+            int earned = (int)(booking.FinalPrice / 100m);
             lp.Points += earned;
             lp.LastUpdated = DateTime.UtcNow;
 
-            // ---------------------------------------------
-            // ========== Update Booking ==========
-            // ---------------------------------------------
+            // ----------------------------------
+            // 4. UPDATE BOOKING STATUS
+            // ----------------------------------
             booking.Status = "Paid";
             booking.PaymentStatus = PaymentStatus.Paid;
 
-            // ---------------------------------------------
-            // ========== Generate QR Code ==========
-            // ---------------------------------------------
+            // ----------------------------------
+            // 5. GENERATE QR CODE
+            // ----------------------------------
             string qrFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "qrcodes");
             Directory.CreateDirectory(qrFolder);
 
@@ -121,6 +137,7 @@ namespace StarEvents.Areas.Customer.Controllers
 
             return RedirectToAction("Success", new { id = booking.BookingId });
         }
+
 
         // ===================================================================
         // STEP 5 : PAYMENT SUCCESS PAGE
