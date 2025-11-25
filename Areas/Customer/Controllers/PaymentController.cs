@@ -137,7 +137,7 @@ namespace StarEvents.Areas.Customer.Controllers
 
             return RedirectToAction("Success", new { id = booking.BookingId });
         }
-
+ 
 
         // ===================================================================
         // STEP 5 : PAYMENT SUCCESS PAGE
