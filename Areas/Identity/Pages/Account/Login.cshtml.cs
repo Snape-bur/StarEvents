@@ -107,67 +107,72 @@ namespace StarEvents.Areas.Identity.Pages.Account
             returnUrl ??= Url.Content("~/");
             ExternalLogins = (await _signInManager.GetExternalAuthenticationSchemesAsync()).ToList();
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
-                // 🔍 Find the user by email
-                var user = await _signInManager.UserManager.FindByEmailAsync(Input.Email);
+                return Page();
+            }
 
-                if (user != null)
-                {
-                    // ✅ Block inactive or pending organizers
-                    if (user.IsOrganizer && !user.IsActive)
-                    {
-                        ModelState.AddModelError(string.Empty,
-                            "Your organizer account is pending admin approval. Please try again later.");
-                        return Page();
-                    }
-                }
+            // 🔍 Find the user by email
+            var user = await _signInManager.UserManager.FindByEmailAsync(Input.Email);
 
-                // ✅ Attempt sign-in
-                var result = await _signInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
-
-                if (result.Succeeded)
-                {
-                    _logger.LogInformation("User logged in.");
-
-                    // ✅ Fetch user and redirect by role
-                    user ??= await _signInManager.UserManager.FindByEmailAsync(Input.Email);
-
-                    if (await _signInManager.UserManager.IsInRoleAsync(user, "Admin"))
-                    {
-                        return LocalRedirect("/Admin/Dashboard");
-                    }
-                    else if (await _signInManager.UserManager.IsInRoleAsync(user, "Organizer"))
-                    {
-                        return LocalRedirect("/Organizer/Dashboard");
-                    }
-                    else if (await _signInManager.UserManager.IsInRoleAsync(user, "Customer"))
-                    {
-                        return LocalRedirect("/Customer/Home");
-                    }
-
-                    // Default fallback
-                    return LocalRedirect(returnUrl);
-                }
-
-                if (result.RequiresTwoFactor)
-                {
-                    return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
-                }
-
-                if (result.IsLockedOut)
-                {
-                    _logger.LogWarning("User account locked out.");
-                    return RedirectToPage("./Lockout");
-                }
-
+            if (user == null)
+            {
+                // Email not found
                 ModelState.AddModelError(string.Empty, "Invalid login attempt.");
                 return Page();
             }
 
-            // Something failed, redisplay form
+            // ✅ Block inactive or pending organizers
+            if (user.IsOrganizer && !user.IsActive)
+            {
+                ModelState.AddModelError(string.Empty,
+                    "Your organizer account is pending admin approval. Please try again later.");
+                return Page();
+            }
+
+            // ✅ Use user object (or user.UserName) for sign-in
+            var result = await _signInManager.PasswordSignInAsync(
+                user,                     // 👈 this is safer
+                Input.Password,
+                Input.RememberMe,
+                lockoutOnFailure: false);
+
+            if (result.Succeeded)
+            {
+                _logger.LogInformation("User logged in.");
+
+                // Role-based redirect
+                if (await _signInManager.UserManager.IsInRoleAsync(user, "Admin"))
+                {
+                    return LocalRedirect("/Admin/Dashboard");
+                }
+                else if (await _signInManager.UserManager.IsInRoleAsync(user, "Organizer"))
+                {
+                    return LocalRedirect("/Organizer/Dashboard");
+                }
+                else if (await _signInManager.UserManager.IsInRoleAsync(user, "Customer"))
+                {
+                    return LocalRedirect("/Customer/Home");
+                }
+
+                return LocalRedirect(returnUrl);
+            }
+
+            if (result.RequiresTwoFactor)
+            {
+                return RedirectToPage("./LoginWith2fa", new { ReturnUrl = returnUrl, RememberMe = Input.RememberMe });
+            }
+
+            if (result.IsLockedOut)
+            {
+                _logger.LogWarning("User account locked out.");
+                return RedirectToPage("./Lockout");
+            }
+
+            ModelState.AddModelError(string.Empty, "Invalid login attempt.");
             return Page();
         }
+
 
 
     }

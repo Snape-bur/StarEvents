@@ -22,9 +22,10 @@ builder.Services.AddHostedService<BookingExpiryService>();
 //  Updated Identity configuration to use AppUser + Roles
 builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
 {
-    options.SignIn.RequireConfirmedAccount = true;
+    options.SignIn.RequireConfirmedAccount = false; // FIX
     options.User.RequireUniqueEmail = true;
 })
+
 .AddEntityFrameworkStores<ApplicationDbContext>()
 .AddDefaultTokenProviders()
 .AddDefaultUI();

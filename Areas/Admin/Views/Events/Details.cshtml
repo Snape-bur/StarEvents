@@ -1,90 +1,116 @@
 ﻿@model StarEvents.Models.Event
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Event Details";
 }
 
-<h1>Details</h1>
+<div class="max-w-3xl mx-auto bg-white shadow-lg rounded-2xl p-8 mt-8">
 
-<div>
-    <h4>Event</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Title)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Title)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Description)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Description)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.StartDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.StartDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.EndDate)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.EndDate)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TicketPrice)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TicketPrice)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TotalSeats)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TotalSeats)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.AvailableSeats)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.AvailableSeats)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Venue)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Venue.Location)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Category)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Category.Name)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Organizer)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Organizer.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Status)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Status)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.CreatedAt)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.CreatedAt)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.EventId">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <h2 class="text-2xl font-semibold text-blue-600 mb-6 text-center">Event Details</h2>
+
+    <div class="space-y-6">
+
+        <!-- Title -->
+        <div>
+            <p class="text-gray-500 text-sm font-medium">Title</p>
+            <p class="font-semibold text-gray-800">@Model.Title</p>
+        </div>
+
+        <!-- Description -->
+        <div>
+            <p class="text-gray-500 text-sm font-medium">Description</p>
+            <p class="text-gray-700">@Model.Description</p>
+        </div>
+
+        <!-- Dates -->
+        <div class="grid grid-cols-2 gap-4">
+            <div>
+                <p class="text-gray-500 text-sm font-medium">Start Date</p>
+                <p class="font-semibold text-gray-800">@Model.StartDate</p>
+            </div>
+            <div>
+                <p class="text-gray-500 text-sm font-medium">End Date</p>
+                <p class="font-semibold text-gray-800">@Model.EndDate</p>
+            </div>
+        </div>
+
+        <!-- Pricing + Seats -->
+        <div class="grid grid-cols-3 gap-4">
+            <div>
+                <p class="text-gray-500 text-sm font-medium">Ticket Price</p>
+                <p class="font-semibold text-gray-800">@Model.TicketPrice</p>
+            </div>
+
+            <div>
+                <p class="text-gray-500 text-sm font-medium">Total Seats</p>
+                <p class="font-semibold text-gray-800">@Model.TotalSeats</p>
+            </div>
+
+            <div>
+                <p class="text-gray-500 text-sm font-medium">Available Seats</p>
+                <p class="font-semibold text-gray-800">@Model.AvailableSeats</p>
+            </div>
+        </div>
+
+        <!-- Venue + Category + Organizer -->
+        <div class="grid grid-cols-3 gap-4">
+            <div>
+                <p class="text-gray-500 text-sm font-medium">Venue</p>
+                <p class="font-semibold text-gray-800">@Model.Venue?.Location</p>
+            </div>
+
+            <div>
+                <p class="text-gray-500 text-sm font-medium">Category</p>
+                <p class="font-semibold text-gray-800">@Model.Category?.Name</p>
+            </div>
+
+            <div>
+                <p class="text-gray-500 text-sm font-medium">Organizer</p>
+                <p class="font-semibold text-gray-800">@Model.Organizer?.Email</p>
+
+            </div>
+        </div>
+
+        <!-- Status -->
+        <div>
+            <p class="text-gray-500 text-sm font-medium">Status</p>
+
+            @if (Model.Status == "Approved")
+            {
+                <span class="px-3 py-1 bg-green-100 text-green-700 text-xs rounded-full font-semibold">
+                    Approved
+                </span>
+            }
+            else if (Model.Status == "Pending")
+            {
+                <span class="px-3 py-1 bg-yellow-100 text-yellow-700 text-xs rounded-full font-semibold">
+                    Pending
+                </span>
+            }
+            else
+            {
+                <span class="px-3 py-1 bg-red-100 text-red-600 text-xs rounded-full font-semibold">
+                    Rejected
+                </span>
+            }
+        </div>
+
+        <!-- Created At -->
+        <div>
+            <p class="text-gray-500 text-sm font-medium">Created At</p>
+            <p class="font-semibold text-gray-800">@Model.CreatedAt</p>
+        </div>
+
+    </div>
+
+    <div class="flex justify-between mt-8">
+        <a asp-action="Index" class="text-gray-600 hover:text-gray-800 font-medium">
+            ← Back to List
+        </a>
+
+        <a asp-action="Edit" asp-route-id="@Model.EventId"
+           class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-md shadow-md transition">
+            Edit Event
+        </a>
+    </div>
 </div>
